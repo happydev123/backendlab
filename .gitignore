@@ -1,0 +1,22 @@
+# Build output
+/bin/
+/dist/
+*.exe
+*.test
+*.out
+coverage.*
+
+# Local configuration and secrets
+.env
+*.local.yaml
+
+# Reports written during local runs
+/reports/
+
+# Fuzz corpora generated locally (seeds live in the test files)
+testdata/fuzz/
+
+# Editor files
+.idea/
+.vscode/
+*.swp
