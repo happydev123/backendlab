@@ -1,0 +1,41 @@
+# BackendLab report: compare
+
+- Status: **failed**
+- Tool: backendlab `test`
+- Schema: `backendlab.report/v1`
+- Input (suite): `examples/invoice.yaml` sha256 `0123456789ab`
+- Targets: baseline, candidate
+
+## Summary
+
+| Measure | Count |
+|---|---|
+| Cases | 3 |
+| Cases passed | 1 |
+| Cases failed | 1 |
+| Cases error | 1 |
+| Findings | 3 |
+| Failing findings | 2 |
+| difference | 1 |
+| inconclusive | 1 |
+| transport\_error | 1 |
+
+## Cases
+
+| Case | Status | Observations |
+|---|---|---|
+| `get-invoice` | failed | baseline 200 12\.5ms \| candidate 200 1\.52s |
+| `list\|invoices` | error | baseline error: connection refused |
+| `health` | passed |  |
+
+## Findings
+
+| Severity | Kind | Code | Case | Location | Explanation |
+|---|---|---|---|---|---|
+| warning | inconclusive | `compare.unordered_key_missing` | `get-invoice` | `/items` | element without key \`sku\` \| \[link\]\(http://x\) |
+| error | difference | `compare.value_changed` | `get-invoice` | `/total` | value changed; expected `100.00`; observed `100.05` |
+| error | transport\_error | `replay.connection_failed` | `list\|invoices` |  | dial failed\\x1b\[31m |
+
+## Limitations
+
+- Single\-run timings are observations, not statistically established regressions\.

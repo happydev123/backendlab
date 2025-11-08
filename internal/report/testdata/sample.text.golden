@@ -1,0 +1,23 @@
+backendlab compare (backendlab test)
+Status: FAILED
+Input: suite examples/invoice.yaml (sha256 0123456789ab)
+Targets: baseline, candidate
+
+Cases: 3 total, 1 passed, 1 failed, 1 error
+  FAIL  get-invoice    baseline 200 12.5ms | candidate 200 1.52s
+  ERROR list|invoices  baseline error: connection refused
+  PASS  health
+
+Findings: 3 (2 failing)
+  [warning] inconclusive compare.unordered_key_missing case=get-invoice at /items
+      element without key `sku` | [link](http://x)
+  [error] difference compare.value_changed case=get-invoice at /total
+      value changed
+      expected: 100.00
+      observed: 100.05
+  [error] transport_error replay.connection_failed case=list|invoices
+      dial failed\x1b[31m
+      target: baseline
+
+Limitations:
+  - Single-run timings are observations, not statistically established regressions.
