@@ -1,0 +1,70 @@
+version: 1
+name: invoice-api
+description: Read-only checks for the invoice extraction API.
+defaults:
+  timeout: 5s
+  headers:
+    Accept: application/json
+  compare:
+    ignore:
+      - /request_id
+      - /generated_at
+cases:
+  - id: list-invoices
+    method: GET
+    path: /invoices
+    query:
+      limit: "5"
+    expect:
+      status: 200
+      json:
+        - pointer: /items
+          type: array
+    capture:
+      - name: first_id
+        pointer: /items/0/id
+  - id: get-invoice
+    description: Fetch the first invoice from the list.
+    method: GET
+    path: /invoices/{id}
+    path_params:
+      id: ${first_id}
+    timeout: 2s
+    expect:
+      status: [200, 203]
+      headers:
+        Content-Type: application/json
+      json:
+        - pointer: /currency
+          equals: USD
+        - pointer: /total
+          equals: 110.10
+        - pointer: /customer/email
+          exists: true
+        - pointer: /invoice_number
+          matches: "^INV-[0-9]+$"
+      max_duration: 750ms
+    compare:
+      headers: [Content-Type]
+      tolerance:
+        absolute: "0.01"
+      path_tolerances:
+        - pointer: /exchange_rate
+          relative: "0.000001"
+      unordered:
+        - pointer: /line_items
+          key: sku
+  - id: create-note
+    method: POST
+    path: /invoices/{id}/notes
+    path_params:
+      id: ${first_id}
+    headers:
+      X-Request-Source: backendlab ${first_id}
+    body:
+      json:
+        invoice: ${first_id}
+        text: "checked"
+        amount: 10.10
+    expect:
+      status: 201
