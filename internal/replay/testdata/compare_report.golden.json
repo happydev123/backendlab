@@ -1,0 +1,261 @@
+{
+  "cases": [
+    {
+      "description": "Obtain a session identifier",
+      "id": "create-session",
+      "observations": [
+        {
+          "duration_ms": 0,
+          "headers_ms": 0,
+          "response_bytes": 20,
+          "status_code": 201,
+          "target": "baseline"
+        },
+        {
+          "duration_ms": 0,
+          "headers_ms": 0,
+          "response_bytes": 20,
+          "status_code": 201,
+          "target": "candidate"
+        }
+      ],
+      "status": "passed"
+    },
+    {
+      "description": "Invoice totals and lines",
+      "id": "get-invoice",
+      "observations": [
+        {
+          "duration_ms": 0,
+          "headers_ms": 0,
+          "response_bytes": 136,
+          "status_code": 200,
+          "target": "baseline"
+        },
+        {
+          "duration_ms": 0,
+          "headers_ms": 0,
+          "response_bytes": 158,
+          "status_code": 200,
+          "target": "candidate"
+        }
+      ],
+      "status": "failed"
+    },
+    {
+      "id": "list-tags",
+      "observations": [
+        {
+          "duration_ms": 0,
+          "headers_ms": 0,
+          "response_bytes": 9,
+          "status_code": 200,
+          "target": "baseline"
+        },
+        {
+          "duration_ms": 0,
+          "headers_ms": 0,
+          "response_bytes": 16,
+          "status_code": 200,
+          "target": "candidate"
+        }
+      ],
+      "status": "failed"
+    },
+    {
+      "id": "health",
+      "observations": [
+        {
+          "duration_ms": 0,
+          "headers_ms": 0,
+          "response_bytes": 11,
+          "status_code": 200,
+          "target": "baseline"
+        },
+        {
+          "duration_ms": 0,
+          "headers_ms": 0,
+          "response_bytes": 11,
+          "status_code": 503,
+          "target": "candidate"
+        }
+      ],
+      "status": "passed"
+    }
+  ],
+  "command": "compare",
+  "findings": [
+    {
+      "case_id": "get-invoice",
+      "code": "compare.within_tolerance",
+      "details": {
+        "baseline_target": "baseline",
+        "candidate_target": "candidate",
+        "count": "1"
+      },
+      "kind": "observation",
+      "message": "1 numeric differences were within the configured tolerance",
+      "module": "compare",
+      "severity": "info"
+    },
+    {
+      "case_id": "get-invoice",
+      "code": "compare.value_changed",
+      "details": {
+        "baseline_target": "baseline",
+        "candidate_target": "candidate"
+      },
+      "expected": "\"USD\"",
+      "kind": "difference",
+      "location": "/currency",
+      "message": "string value changed",
+      "module": "compare",
+      "observed": "\"EUR\"",
+      "severity": "error"
+    },
+    {
+      "case_id": "get-invoice",
+      "code": "compare.field_missing",
+      "details": {
+        "baseline_target": "baseline",
+        "candidate_target": "candidate"
+      },
+      "expected": "0",
+      "kind": "difference",
+      "location": "/discount",
+      "message": "member is missing in candidate",
+      "module": "compare",
+      "observed": "(absent)",
+      "severity": "error"
+    },
+    {
+      "case_id": "get-invoice",
+      "code": "compare.value_changed",
+      "details": {
+        "baseline_target": "baseline",
+        "candidate_target": "candidate"
+      },
+      "expected": "3",
+      "kind": "difference",
+      "location": "/lines/1/qty",
+      "message": "number changed by -1 (tolerance: absolute 0.01)",
+      "module": "compare",
+      "observed": "2",
+      "severity": "error"
+    },
+    {
+      "case_id": "get-invoice",
+      "code": "compare.element_added",
+      "details": {
+        "baseline_target": "baseline",
+        "candidate_target": "candidate"
+      },
+      "expected": "(absent)",
+      "kind": "difference",
+      "location": "/lines/2",
+      "message": "element with sku \"c\" was added in candidate",
+      "module": "compare",
+      "observed": "{\"qty\":5,\"sku\":\"c\"}",
+      "severity": "error"
+    },
+    {
+      "case_id": "get-invoice",
+      "code": "compare.null_vs_absent",
+      "details": {
+        "baseline_target": "baseline",
+        "candidate_target": "candidate"
+      },
+      "expected": "(absent)",
+      "kind": "difference",
+      "location": "/status",
+      "message": "member is absent in baseline and null in candidate",
+      "module": "compare",
+      "observed": "null",
+      "severity": "error"
+    },
+    {
+      "case_id": "list-tags",
+      "code": "compare.body_format_changed",
+      "details": {
+        "baseline_target": "baseline",
+        "candidate_target": "candidate"
+      },
+      "expected": "JSON, 9 bytes, sha256 01f650e85c956201",
+      "kind": "difference",
+      "location": "body",
+      "message": "body format changed; one body is JSON and the other is not",
+      "module": "compare",
+      "observed": "text, 16 bytes, sha256 0af1822fb6437a1f",
+      "severity": "error"
+    },
+    {
+      "case_id": "list-tags",
+      "code": "compare.header_changed",
+      "details": {
+        "baseline_target": "baseline",
+        "candidate_target": "candidate"
+      },
+      "expected": "application/json",
+      "kind": "difference",
+      "location": "header:Content-Type",
+      "message": "header Content-Type changed",
+      "module": "compare",
+      "observed": "text/plain",
+      "severity": "error"
+    }
+  ],
+  "inputs": [
+    {
+      "kind": "suite",
+      "name": "suite.yaml",
+      "sha256": "8c648d476298b1b1c2ded74c6cf385817a6b1b2e8584e90c3c4f1ec520ae4dec"
+    }
+  ],
+  "limitations": [
+    "Timings are single-run observations, not statistically established regressions; only expect.max_duration turns a timing into a failure.",
+    "Cancellation and timeouts stop waiting for responses but do not undo side effects a target may already have applied."
+  ],
+  "schema": "backendlab.report/v1",
+  "status": "failed",
+  "summary": {
+    "cases": 4,
+    "cases_by_status": {
+      "cancelled": 0,
+      "error": 0,
+      "failed": 2,
+      "inconclusive": 0,
+      "passed": 2,
+      "skipped": 0
+    },
+    "findings": {
+      "by_kind": {
+        "assertion_failure": 0,
+        "difference": 7,
+        "inconclusive": 0,
+        "observation": 1,
+        "transport_error": 0,
+        "unsupported": 0
+      },
+      "by_severity": {
+        "error": 7,
+        "info": 1,
+        "warning": 0
+      },
+      "failing": 7,
+      "total": 8
+    }
+  },
+  "targets": [
+    "baseline",
+    "candidate"
+  ],
+  "timing": {
+    "duration_ms": 0,
+    "finished_at": "2000-01-01T00:00:00Z",
+    "started_at": "2000-01-01T00:00:00Z"
+  },
+  "tool": {
+    "name": "backendlab",
+    "version": "0.1.0-dev"
+  }
+}
