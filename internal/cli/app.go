@@ -49,6 +49,8 @@ type command struct {
 
 func (a *App) commands() []command {
 	return []command{
+		{"run", "Run a suite against one target and evaluate assertions", runCommand},
+		{"compare", "Run a suite against baseline and candidate targets and compare responses", compareCommand},
 		{"version", "Print the version", versionCommand},
 	}
 }
