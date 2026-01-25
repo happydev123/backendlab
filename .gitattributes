@@ -1,0 +1,4 @@
+# Byte-exact fixtures: golden reports record sizes and the SSE fixtures
+# deliberately mix line endings.
+internal/stream/testdata/*.sse -text
+*.golden -text

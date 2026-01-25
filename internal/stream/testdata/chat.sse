@@ -1,0 +1,15 @@
+: stream opened
+retry: 2000
+
+data: {"choices":[{"index":0,"delta":{"role":"assistant"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"Bonjour, "},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"ça va ?"},"finish_reason":null}]}
+
+: keep-alive
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
+
+data: [DONE]
+

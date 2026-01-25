@@ -1,0 +1,4 @@
+{"format":"backendlab.sse-recording/v1"}
+{"offset_ms":50,"chunk":"data: {\"delta\":\"one\"}\n\n"}
+{"offset_ms":400,"chunk":"data: {\"delta\":\"two\"}\n\ndata: {\"del"}
+{"offset_ms":2000,"end":"stopped","termination":"timeout"}

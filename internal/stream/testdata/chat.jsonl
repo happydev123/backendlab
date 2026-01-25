@@ -1,0 +1,7 @@
+{"format":"backendlab.sse-recording/v1"}
+{"offset_ms":120.5,"chunk":"event: message_start\ndata: {\"type\":\"message_start\"}\n\n"}
+{"offset_ms":180,"chunk_b64":"ZXZlbnQ6IGRlbHRhCmRhdGE6IHsidHlwZSI6ImNvbnRlbnRfYmxvY2tfZGVsdGEiLCJkZWx0YSI6eyJ0eXBlIjoidGV4dF9kZWx0YSIsInRleHQiOiJoww=="}
+{"offset_ms":195.25,"chunk_b64":"qSJ9fQoK"}
+{"offset_ms":900,"chunk":"event: delta\ndata: {\"type\":\"content_block_delta\",\"delta\":{\"type\":\"text_delta\",\"text\":\"llo\"}}\n\n"}
+{"offset_ms":950,"chunk":"event: message_delta\ndata: {\"type\":\"message_delta\",\"delta\":{\"stop_reason\":\"end_turn\"}}\n\nevent: done\ndata: {}\n\n"}
+{"offset_ms":960,"end":"eof"}
