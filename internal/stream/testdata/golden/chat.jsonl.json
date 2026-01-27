@@ -1,0 +1,114 @@
+{
+  "schema": "backendlab.report/v1",
+  "tool": {
+    "name": "backendlab",
+    "version": "test"
+  },
+  "command": "stream.inspect",
+  "inputs": [
+    {
+      "kind": "stream",
+      "name": "chat.jsonl"
+    }
+  ],
+  "status": "failed",
+  "summary": {
+    "cases": 1,
+    "cases_by_status": {
+      "cancelled": 0,
+      "error": 0,
+      "failed": 1,
+      "inconclusive": 0,
+      "passed": 0,
+      "skipped": 0
+    },
+    "findings": {
+      "total": 3,
+      "failing": 1,
+      "by_kind": {
+        "assertion_failure": 1,
+        "difference": 0,
+        "inconclusive": 0,
+        "observation": 2,
+        "transport_error": 0,
+        "unsupported": 0
+      },
+      "by_severity": {
+        "error": 1,
+        "info": 2,
+        "warning": 0
+      }
+    }
+  },
+  "cases": [
+    {
+      "id": "golden",
+      "status": "failed",
+      "observations": [
+        {
+          "target": "chat.jsonl",
+          "duration_ms": 960,
+          "first_event_ms": 120.5,
+          "response_bytes": 351,
+          "events": 5
+        }
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "module": "stream",
+      "code": "stream.adapter_summary",
+      "kind": "observation",
+      "severity": "info",
+      "case_id": "golden",
+      "message": "chat-delta adapter assembled 6 bytes of text from 3 delta events",
+      "observed": "héllo",
+      "details": {
+        "adapter": "chat-delta",
+        "deltas": "3",
+        "finish_reasons": "end_turn",
+        "lifecycle": "1",
+        "text_bytes": "6",
+        "unrecognized": "0"
+      }
+    },
+    {
+      "module": "stream",
+      "code": "stream.summary",
+      "kind": "observation",
+      "severity": "info",
+      "case_id": "golden",
+      "message": "5 events, termination terminal_event, timed",
+      "details": {
+        "bytes": "351",
+        "comments": "0",
+        "duration_ms": "960",
+        "events": "5",
+        "first_event_ms": "120.5",
+        "format": "recording",
+        "gap_max_ms": "704.75",
+        "gap_p50_ms": "50",
+        "gaps": "4",
+        "terminal_index": "4",
+        "terminal_seen": "true",
+        "termination": "terminal_event",
+        "unknown_fields": "0"
+      }
+    },
+    {
+      "module": "stream",
+      "code": "stream.max_gap_exceeded",
+      "kind": "assertion_failure",
+      "severity": "error",
+      "case_id": "golden",
+      "location": "event:2",
+      "message": "1 of 4 gaps between events exceeded max_gap",
+      "expected": "<= 500ms",
+      "observed": "704.75ms"
+    }
+  ],
+  "limitations": [
+    "Event times come from recorded chunk offsets; events in the same chunk share one time."
+  ]
+}

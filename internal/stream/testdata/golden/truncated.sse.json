@@ -1,0 +1,162 @@
+{
+  "schema": "backendlab.report/v1",
+  "tool": {
+    "name": "backendlab",
+    "version": "test"
+  },
+  "command": "stream.inspect",
+  "inputs": [
+    {
+      "kind": "stream",
+      "name": "truncated.sse"
+    }
+  ],
+  "status": "failed",
+  "summary": {
+    "cases": 1,
+    "cases_by_status": {
+      "cancelled": 0,
+      "error": 0,
+      "failed": 1,
+      "inconclusive": 0,
+      "passed": 0,
+      "skipped": 0
+    },
+    "findings": {
+      "total": 8,
+      "failing": 4,
+      "by_kind": {
+        "assertion_failure": 4,
+        "difference": 0,
+        "inconclusive": 0,
+        "observation": 4,
+        "transport_error": 0,
+        "unsupported": 0
+      },
+      "by_severity": {
+        "error": 4,
+        "info": 1,
+        "warning": 3
+      }
+    }
+  },
+  "cases": [
+    {
+      "id": "golden",
+      "status": "failed",
+      "observations": [
+        {
+          "target": "truncated.sse",
+          "response_bytes": 162,
+          "events": 4
+        }
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "module": "stream",
+      "code": "stream.missing_terminal",
+      "kind": "assertion_failure",
+      "severity": "error",
+      "case_id": "golden",
+      "message": "stream ended (EOF) before the required terminal marker",
+      "expected": "data [DONE]",
+      "observed": "eof"
+    },
+    {
+      "module": "stream",
+      "code": "stream.summary",
+      "kind": "observation",
+      "severity": "info",
+      "case_id": "golden",
+      "message": "4 events, termination eof, timing unknown",
+      "details": {
+        "bytes": "162",
+        "comments": "0",
+        "events": "4",
+        "format": "sse",
+        "terminal_seen": "false",
+        "termination": "eof",
+        "unknown_fields": "0"
+      }
+    },
+    {
+      "module": "stream",
+      "code": "stream.schema_violation",
+      "kind": "assertion_failure",
+      "severity": "error",
+      "case_id": "golden",
+      "location": "event:2/seq",
+      "message": "got string, want integer",
+      "details": {
+        "keyword": "/properties/seq/type",
+        "schema": "chunk.json"
+      }
+    },
+    {
+      "module": "stream",
+      "code": "stream.invalid_json_payload",
+      "kind": "assertion_failure",
+      "severity": "error",
+      "case_id": "golden",
+      "location": "event:3",
+      "message": "event data is not valid JSON: parse JSON: invalid character 'o' in literal null (expecting 'u')",
+      "observed": "not json",
+      "details": {
+        "event_type": "message"
+      }
+    },
+    {
+      "module": "stream",
+      "code": "stream.incomplete_event",
+      "kind": "observation",
+      "severity": "warning",
+      "case_id": "golden",
+      "location": "event:4",
+      "message": "stream ended inside an event (no terminating blank line); per the standard it was not dispatched",
+      "details": {
+        "discarded_bytes": "15"
+      }
+    },
+    {
+      "module": "stream",
+      "code": "stream.id_contains_nul",
+      "kind": "observation",
+      "severity": "warning",
+      "case_id": "golden",
+      "location": "line:4",
+      "message": "id field contains NUL and was ignored",
+      "observed": "7\u0000x",
+      "details": {
+        "next_event": "1"
+      }
+    },
+    {
+      "module": "stream",
+      "code": "stream.invalid_retry",
+      "kind": "observation",
+      "severity": "warning",
+      "case_id": "golden",
+      "location": "line:5",
+      "message": "retry field is not a number of at most 9 ASCII digits and was ignored",
+      "observed": "later",
+      "details": {
+        "next_event": "1"
+      }
+    },
+    {
+      "module": "stream",
+      "code": "stream.missing_required_event",
+      "kind": "assertion_failure",
+      "severity": "error",
+      "case_id": "golden",
+      "location": "type:end",
+      "message": "required event type was not received (4 events read, termination eof)",
+      "expected": "end"
+    }
+  ],
+  "limitations": [
+    "Saved SSE text has no reliable timing: first-event time, gaps and duration are unknown, and none is inferred from position in the file."
+  ]
+}

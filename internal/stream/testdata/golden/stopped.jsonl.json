@@ -1,0 +1,96 @@
+{
+  "schema": "backendlab.report/v1",
+  "tool": {
+    "name": "backendlab",
+    "version": "test"
+  },
+  "command": "stream.inspect",
+  "inputs": [
+    {
+      "kind": "stream",
+      "name": "stopped.jsonl"
+    }
+  ],
+  "status": "failed",
+  "summary": {
+    "cases": 1,
+    "cases_by_status": {
+      "cancelled": 0,
+      "error": 0,
+      "failed": 1,
+      "inconclusive": 0,
+      "passed": 0,
+      "skipped": 0
+    },
+    "findings": {
+      "total": 2,
+      "failing": 1,
+      "by_kind": {
+        "assertion_failure": 0,
+        "difference": 0,
+        "inconclusive": 0,
+        "observation": 1,
+        "transport_error": 1,
+        "unsupported": 0
+      },
+      "by_severity": {
+        "error": 1,
+        "info": 1,
+        "warning": 0
+      }
+    }
+  },
+  "cases": [
+    {
+      "id": "golden",
+      "status": "failed",
+      "observations": [
+        {
+          "target": "stopped.jsonl",
+          "duration_ms": 2000,
+          "first_event_ms": 50,
+          "response_bytes": 57,
+          "events": 2,
+          "error": "timeout"
+        }
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "module": "stream",
+      "code": "stream.summary",
+      "kind": "observation",
+      "severity": "info",
+      "case_id": "golden",
+      "message": "2 events, termination timeout, timed",
+      "details": {
+        "bytes": "57",
+        "comments": "0",
+        "duration_ms": "2000",
+        "events": "2",
+        "first_event_ms": "50",
+        "format": "recording",
+        "gap_max_ms": "350",
+        "gap_p50_ms": "350",
+        "gaps": "1",
+        "terminal_seen": "false",
+        "termination": "timeout",
+        "unknown_fields": "0"
+      }
+    },
+    {
+      "module": "stream",
+      "code": "stream.timeout",
+      "kind": "transport_error",
+      "severity": "error",
+      "case_id": "golden",
+      "message": "deadline expired while reading the stream after 2 events",
+      "observed": "recorded live read timed out"
+    }
+  ],
+  "limitations": [
+    "Event times come from recorded chunk offsets; events in the same chunk share one time.",
+    "The recording was stopped by the reader before the response body ended; data after that point was not captured."
+  ]
+}
