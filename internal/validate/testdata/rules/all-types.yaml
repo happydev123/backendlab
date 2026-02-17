@@ -1,0 +1,62 @@
+# Uses every rule type once; parse_test.go loads it.
+version: 1
+document_id: /invoice_number
+rules:
+  - id: required-core
+    type: required
+    fields: [/invoice_number, /currency, /total, /line_items/*/amount]
+  - id: currency
+    type: allowed_values
+    field: /currency
+    values: [EUR, USD, GBP]
+  - id: number-format
+    type: pattern
+    field: /invoice_number
+    pattern: '^INV-[0-9]{4}$'
+    severity: warning
+  - id: amounts
+    type: decimal
+    description: Money values use at most two decimal places.
+    fields: [/subtotal, /tax, /total, /line_items/*/amount]
+    accept: [number, string]
+    max_scale: 2
+    min: 0
+  - id: totals
+    type: sum
+    terms:
+      - field: /subtotal
+      - field: /tax
+      - field: /discount
+        sign: -1
+        optional: true
+    equals: /total
+    tolerance: 0.01
+  - id: lines
+    type: line_items_sum
+    items: /line_items
+    amount: amount
+    equals: /subtotal
+  - id: line-product
+    type: line_item_product
+    items: /line_items
+    quantity: quantity
+    unit_price: unit_price
+    amount: amount
+    round: {scale: 2, mode: half_up}
+  - id: tax
+    type: product
+    factors: [/subtotal, /tax_rate]
+    equals: /tax
+    round: {scale: 2, mode: half_even}
+  - id: dates
+    type: date
+    fields: [/issue_date, /due_date]
+    layout: date
+  - id: due-after-issue
+    type: date_order
+    before: /issue_date
+    after: /due_date
+    allow_equal: true
+  - id: unique-number
+    type: unique
+    field: /invoice_number
