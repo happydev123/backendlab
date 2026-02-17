@@ -1,0 +1,10 @@
+version: 1
+schema: doc.schema.json
+document_id: /id
+rules:
+  - id: totals
+    type: sum
+    terms:
+      - field: /subtotal
+      - field: /tax
+    equals: /total
