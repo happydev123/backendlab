@@ -1,0 +1,36 @@
+backendlab validate (backendlab test)
+Status: FAILED
+Input: documents testdata/documents/mixed.jsonl
+
+Cases: 4 total, 2 passed, 1 failed, 1 inconclusive
+  PASS  A-1
+  INCON A-2
+  FAIL  7
+  PASS  A-\x1b[31m4
+
+Findings: 4 (3 failing)
+  [error] assertion_failure validate.schema case=7 at /card_number
+      schema doc.schema.json: value violates /properties/card_number/pattern
+      expected: document valid against schema doc.schema.json
+      observed: [REDACTED]
+      keyword: /properties/card_number/pattern
+      schema: doc.schema.json
+  [error] assertion_failure validate.schema case=7 at /id
+      schema doc.schema.json: got number, want string
+      expected: document valid against schema doc.schema.json
+      observed: 7
+      keyword: /properties/id/type
+      schema: doc.schema.json
+  [error] assertion_failure validate.sum case=7 at /total
+      rule "totals" cannot be evaluated: /total is a string that is not a decimal
+      expected: /subtotal + /tax = /total (exact)
+      observed: "x"
+      rule_id: totals
+  [warning] inconclusive validate.input_missing case=A-2 at /tax
+      rule "totals" cannot be evaluated: /tax absent or null
+      expected: /subtotal + /tax = /total (exact)
+      rule_id: totals
+      rule_type: sum
+
+Limitations:
+  - Passing validation shows that the documents are consistent with the configured schema and rules; it does not establish that they are authentic or factually correct, or that the extraction matched the source document.

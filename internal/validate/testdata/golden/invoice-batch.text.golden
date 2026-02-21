@@ -1,0 +1,30 @@
+backendlab validate (backendlab test)
+Status: FAILED
+Input: rules examples/invoice/invoice-rules.yaml
+Input: documents examples/invoice/invoices-batch.json
+
+Cases: 4 total, 1 passed, 3 failed
+  FAIL  INV-1001
+  FAIL  INV-1002
+  PASS  INV-1003
+  FAIL  INV-1001#3
+
+Findings: 3 (3 failing)
+  [error] assertion_failure validate.unique case=INV-1001 at /invoice_number
+      rule "unique-invoice-number": the value of /invoice_number also appears in INV-1001#3
+      expected: /invoice_number unique within the batch
+      observed: "INV-1001"
+      rule_id: unique-invoice-number
+  [error] assertion_failure validate.unique case=INV-1001#3 at /invoice_number
+      rule "unique-invoice-number": the value of /invoice_number also appears in INV-1001
+      expected: /invoice_number unique within the batch
+      observed: "INV-1001"
+      rule_id: unique-invoice-number
+  [error] assertion_failure validate.sum case=INV-1002 at /total
+      rule "total": computed 179.96 from /subtotal (149.97) + /tax (29.99); stated /total is 180.00; difference 0.04 exceeds tolerance 0.01
+      expected: /subtotal + /tax - /discount (optional) = /total (tolerance 0.01)
+      observed: 180.00
+      rule_id: total
+
+Limitations:
+  - Passing validation shows that the documents are consistent with the configured schema and rules; it does not establish that they are authentic or factually correct, or that the extraction matched the source document.

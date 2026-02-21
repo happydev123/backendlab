@@ -1,0 +1,58 @@
+[
+  {
+    "invoice_number": "INV-1001",
+    "issue_date": "2026-09-01",
+    "due_date": "2026-10-01",
+    "currency": "EUR",
+    "supplier": {"name": "Example Supplies GmbH", "tax_id": "DE000000000"},
+    "line_items": [
+      {"description": "Consulting hours", "quantity": 10, "unit_price": "85.00", "amount": "850.00"},
+      {"description": "Travel", "quantity": 1, "unit_price": "150.00", "amount": "150.00"}
+    ],
+    "subtotal": "1000.00",
+    "tax_rate": "0.19",
+    "tax": "190.00",
+    "total": "1190.00"
+  },
+  {
+    "invoice_number": "INV-1002",
+    "issue_date": "2026-09-03",
+    "due_date": "2026-09-17",
+    "currency": "USD",
+    "line_items": [
+      {"description": "Software licence", "quantity": 3, "unit_price": "49.99", "amount": "149.97"}
+    ],
+    "subtotal": "149.97",
+    "tax_rate": "0.20",
+    "tax": "29.99",
+    "total": "180.00"
+  },
+  {
+    "invoice_number": "INV-1003",
+    "issue_date": "2026-09-05",
+    "due_date": "2026-09-05",
+    "currency": "GBP",
+    "line_items": [
+      {"description": "Sample A", "quantity": 1, "unit_price": 0.10, "amount": 0.10},
+      {"description": "Sample B", "quantity": 2, "unit_price": 0.10, "amount": 0.20}
+    ],
+    "subtotal": 0.30,
+    "tax_rate": "0",
+    "tax": "0.00",
+    "discount": 0.05,
+    "total": 0.25
+  },
+  {
+    "invoice_number": "INV-1001",
+    "issue_date": "2026-09-15",
+    "due_date": "2026-10-15",
+    "currency": "EUR",
+    "line_items": [
+      {"description": "Support plan", "quantity": 12, "unit_price": "25.00", "amount": "300.00"}
+    ],
+    "subtotal": "300.00",
+    "tax_rate": "0.19",
+    "tax": "57.00",
+    "total": "357.00"
+  }
+]

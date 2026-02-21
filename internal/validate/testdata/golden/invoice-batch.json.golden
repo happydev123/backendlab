@@ -1,0 +1,116 @@
+{
+  "schema": "backendlab.report/v1",
+  "tool": {
+    "name": "backendlab",
+    "version": "test"
+  },
+  "command": "validate",
+  "inputs": [
+    {
+      "kind": "rules",
+      "name": "examples/invoice/invoice-rules.yaml"
+    },
+    {
+      "kind": "documents",
+      "name": "examples/invoice/invoices-batch.json"
+    }
+  ],
+  "status": "failed",
+  "summary": {
+    "cases": 4,
+    "cases_by_status": {
+      "cancelled": 0,
+      "error": 0,
+      "failed": 3,
+      "inconclusive": 0,
+      "passed": 1,
+      "skipped": 0
+    },
+    "findings": {
+      "total": 3,
+      "failing": 3,
+      "by_kind": {
+        "assertion_failure": 3,
+        "difference": 0,
+        "inconclusive": 0,
+        "observation": 0,
+        "transport_error": 0,
+        "unsupported": 0
+      },
+      "by_severity": {
+        "error": 3,
+        "info": 0,
+        "warning": 0
+      }
+    }
+  },
+  "cases": [
+    {
+      "id": "INV-1001",
+      "description": "document 0",
+      "status": "failed"
+    },
+    {
+      "id": "INV-1002",
+      "description": "document 1",
+      "status": "failed"
+    },
+    {
+      "id": "INV-1003",
+      "description": "document 2",
+      "status": "passed"
+    },
+    {
+      "id": "INV-1001#3",
+      "description": "document 3",
+      "status": "failed"
+    }
+  ],
+  "findings": [
+    {
+      "module": "validate",
+      "code": "validate.unique",
+      "kind": "assertion_failure",
+      "severity": "error",
+      "case_id": "INV-1001",
+      "location": "/invoice_number",
+      "message": "rule \"unique-invoice-number\": the value of /invoice_number also appears in INV-1001#3",
+      "expected": "/invoice_number unique within the batch",
+      "observed": "\"INV-1001\"",
+      "details": {
+        "rule_id": "unique-invoice-number"
+      }
+    },
+    {
+      "module": "validate",
+      "code": "validate.unique",
+      "kind": "assertion_failure",
+      "severity": "error",
+      "case_id": "INV-1001#3",
+      "location": "/invoice_number",
+      "message": "rule \"unique-invoice-number\": the value of /invoice_number also appears in INV-1001",
+      "expected": "/invoice_number unique within the batch",
+      "observed": "\"INV-1001\"",
+      "details": {
+        "rule_id": "unique-invoice-number"
+      }
+    },
+    {
+      "module": "validate",
+      "code": "validate.sum",
+      "kind": "assertion_failure",
+      "severity": "error",
+      "case_id": "INV-1002",
+      "location": "/total",
+      "message": "rule \"total\": computed 179.96 from /subtotal (149.97) + /tax (29.99); stated /total is 180.00; difference 0.04 exceeds tolerance 0.01",
+      "expected": "/subtotal + /tax - /discount (optional) = /total (tolerance 0.01)",
+      "observed": "180.00",
+      "details": {
+        "rule_id": "total"
+      }
+    }
+  ],
+  "limitations": [
+    "Passing validation shows that the documents are consistent with the configured schema and rules; it does not establish that they are authentic or factually correct, or that the extraction matched the source document."
+  ]
+}

@@ -1,0 +1,39 @@
+# BackendLab report: validate
+
+- Status: **failed**
+- Tool: backendlab `test`
+- Schema: `backendlab.report/v1`
+- Input (rules): `examples/invoice/invoice-rules.yaml`
+- Input (documents): `examples/invoice/invoices-batch.json`
+
+## Summary
+
+| Measure | Count |
+|---|---|
+| Cases | 4 |
+| Cases passed | 1 |
+| Cases failed | 3 |
+| Findings | 3 |
+| Failing findings | 3 |
+| assertion\_failure | 3 |
+
+## Cases
+
+| Case | Status | Observations |
+|---|---|---|
+| `INV-1001` | failed |  |
+| `INV-1002` | failed |  |
+| `INV-1003` | passed |  |
+| `INV-1001#3` | failed |  |
+
+## Findings
+
+| Severity | Kind | Code | Case | Location | Explanation |
+|---|---|---|---|---|---|
+| error | assertion\_failure | `validate.unique` | `INV-1001` | `/invoice_number` | rule "unique\-invoice\-number": the value of /invoice\_number also appears in INV\-1001\#3; expected `/invoice_number unique within the batch`; observed `"INV-1001"` |
+| error | assertion\_failure | `validate.unique` | `INV-1001#3` | `/invoice_number` | rule "unique\-invoice\-number": the value of /invoice\_number also appears in INV\-1001; expected `/invoice_number unique within the batch`; observed `"INV-1001"` |
+| error | assertion\_failure | `validate.sum` | `INV-1002` | `/total` | rule "total": computed 179\.96 from /subtotal \(149\.97\) \+ /tax \(29\.99\); stated /total is 180\.00; difference 0\.04 exceeds tolerance 0\.01; expected `/subtotal + /tax - /discount (optional) = /total (tolerance 0.01)`; observed `180.00` |
+
+## Limitations
+
+- Passing validation shows that the documents are consistent with the configured schema and rules; it does not establish that they are authentic or factually correct, or that the extraction matched the source document\.

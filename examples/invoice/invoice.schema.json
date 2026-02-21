@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Extracted invoice",
+  "type": "object",
+  "required": ["invoice_number", "issue_date", "currency", "line_items", "subtotal", "tax", "total"],
+  "properties": {
+    "invoice_number": {"type": "string", "minLength": 1},
+    "issue_date": {"type": "string"},
+    "due_date": {"type": "string"},
+    "currency": {"type": "string"},
+    "supplier": {
+      "type": "object",
+      "properties": {
+        "name": {"type": "string"},
+        "tax_id": {"type": "string"}
+      }
+    },
+    "line_items": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/line_item"}
+    },
+    "subtotal": {"$ref": "#/$defs/amount"},
+    "tax_rate": {"$ref": "#/$defs/amount"},
+    "tax": {"$ref": "#/$defs/amount"},
+    "discount": {"$ref": "#/$defs/amount"},
+    "total": {"$ref": "#/$defs/amount"}
+  },
+  "$defs": {
+    "amount": {"type": ["string", "number"]},
+    "line_item": {
+      "type": "object",
+      "required": ["description", "quantity", "unit_price", "amount"],
+      "properties": {
+        "description": {"type": "string"},
+        "quantity": {"$ref": "#/$defs/amount"},
+        "unit_price": {"$ref": "#/$defs/amount"},
+        "amount": {"$ref": "#/$defs/amount"}
+      }
+    }
+  }
+}

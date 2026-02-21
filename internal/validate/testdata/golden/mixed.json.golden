@@ -1,0 +1,128 @@
+{
+  "schema": "backendlab.report/v1",
+  "tool": {
+    "name": "backendlab",
+    "version": "test"
+  },
+  "command": "validate",
+  "inputs": [
+    {
+      "kind": "documents",
+      "name": "testdata/documents/mixed.jsonl"
+    }
+  ],
+  "status": "failed",
+  "summary": {
+    "cases": 4,
+    "cases_by_status": {
+      "cancelled": 0,
+      "error": 0,
+      "failed": 1,
+      "inconclusive": 1,
+      "passed": 2,
+      "skipped": 0
+    },
+    "findings": {
+      "total": 4,
+      "failing": 3,
+      "by_kind": {
+        "assertion_failure": 3,
+        "difference": 0,
+        "inconclusive": 1,
+        "observation": 0,
+        "transport_error": 0,
+        "unsupported": 0
+      },
+      "by_severity": {
+        "error": 3,
+        "info": 0,
+        "warning": 1
+      }
+    }
+  },
+  "cases": [
+    {
+      "id": "A-1",
+      "description": "document 0",
+      "status": "passed"
+    },
+    {
+      "id": "A-2",
+      "description": "document 1",
+      "status": "inconclusive"
+    },
+    {
+      "id": "7",
+      "description": "document 2",
+      "status": "failed"
+    },
+    {
+      "id": "A-\u001b[31m4",
+      "description": "document 3",
+      "status": "passed"
+    }
+  ],
+  "findings": [
+    {
+      "module": "validate",
+      "code": "validate.schema",
+      "kind": "assertion_failure",
+      "severity": "error",
+      "case_id": "7",
+      "location": "/card_number",
+      "message": "schema doc.schema.json: value violates /properties/card_number/pattern",
+      "expected": "document valid against schema doc.schema.json",
+      "observed": "[REDACTED]",
+      "details": {
+        "keyword": "/properties/card_number/pattern",
+        "schema": "doc.schema.json"
+      }
+    },
+    {
+      "module": "validate",
+      "code": "validate.schema",
+      "kind": "assertion_failure",
+      "severity": "error",
+      "case_id": "7",
+      "location": "/id",
+      "message": "schema doc.schema.json: got number, want string",
+      "expected": "document valid against schema doc.schema.json",
+      "observed": "7",
+      "details": {
+        "keyword": "/properties/id/type",
+        "schema": "doc.schema.json"
+      }
+    },
+    {
+      "module": "validate",
+      "code": "validate.sum",
+      "kind": "assertion_failure",
+      "severity": "error",
+      "case_id": "7",
+      "location": "/total",
+      "message": "rule \"totals\" cannot be evaluated: /total is a string that is not a decimal",
+      "expected": "/subtotal + /tax = /total (exact)",
+      "observed": "\"x\"",
+      "details": {
+        "rule_id": "totals"
+      }
+    },
+    {
+      "module": "validate",
+      "code": "validate.input_missing",
+      "kind": "inconclusive",
+      "severity": "warning",
+      "case_id": "A-2",
+      "location": "/tax",
+      "message": "rule \"totals\" cannot be evaluated: /tax absent or null",
+      "expected": "/subtotal + /tax = /total (exact)",
+      "details": {
+        "rule_id": "totals",
+        "rule_type": "sum"
+      }
+    }
+  ],
+  "limitations": [
+    "Passing validation shows that the documents are consistent with the configured schema and rules; it does not establish that they are authentic or factually correct, or that the extraction matched the source document."
+  ]
+}

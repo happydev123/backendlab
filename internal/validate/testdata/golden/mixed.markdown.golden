@@ -1,0 +1,41 @@
+# BackendLab report: validate
+
+- Status: **failed**
+- Tool: backendlab `test`
+- Schema: `backendlab.report/v1`
+- Input (documents): `testdata/documents/mixed.jsonl`
+
+## Summary
+
+| Measure | Count |
+|---|---|
+| Cases | 4 |
+| Cases passed | 2 |
+| Cases failed | 1 |
+| Cases inconclusive | 1 |
+| Findings | 4 |
+| Failing findings | 3 |
+| assertion\_failure | 3 |
+| inconclusive | 1 |
+
+## Cases
+
+| Case | Status | Observations |
+|---|---|---|
+| `A-1` | passed |  |
+| `A-2` | inconclusive |  |
+| `7` | failed |  |
+| `A-\x1b[31m4` | passed |  |
+
+## Findings
+
+| Severity | Kind | Code | Case | Location | Explanation |
+|---|---|---|---|---|---|
+| error | assertion\_failure | `validate.schema` | `7` | `/card_number` | schema doc\.schema\.json: value violates /properties/card\_number/pattern; expected `document valid against schema doc.schema.json`; observed `[REDACTED]` |
+| error | assertion\_failure | `validate.schema` | `7` | `/id` | schema doc\.schema\.json: got number, want string; expected `document valid against schema doc.schema.json`; observed `7` |
+| error | assertion\_failure | `validate.sum` | `7` | `/total` | rule "totals" cannot be evaluated: /total is a string that is not a decimal; expected `/subtotal + /tax = /total (exact)`; observed `"x"` |
+| warning | inconclusive | `validate.input_missing` | `A-2` | `/tax` | rule "totals" cannot be evaluated: /tax absent or null; expected `/subtotal + /tax = /total (exact)` |
+
+## Limitations
+
+- Passing validation shows that the documents are consistent with the configured schema and rules; it does not establish that they are authentic or factually correct, or that the extraction matched the source document\.
