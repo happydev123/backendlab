@@ -8,6 +8,7 @@ import (
 
 	"github.com/happydev123/backendlab/internal/config"
 	"github.com/happydev123/backendlab/internal/replay"
+	"github.com/happydev123/backendlab/internal/runner"
 	"github.com/happydev123/backendlab/internal/suite"
 )
 
@@ -61,17 +62,17 @@ func (a *App) prepareSuite(sf suiteFlags, suitePath string) (*suiteRun, error) {
 		}
 		a.errorf("warning: --allow-writes permits %d mutating case(s) %v. They are never retried, and cancelling or timing out does not undo side effects already applied upstream.", len(ids), ids)
 	}
-	exec, err := replay.New(replay.Options{
+	r, err := runner.New(runner.Config{
 		Limits:      cfg.Limits,
 		Redactor:    cfg.Redactor(),
 		AllowWrites: sf.allowWrites,
 		Concurrency: sf.concurrency,
 		Transport:   a.Transport,
-	})
+	}, loaded)
 	if err != nil {
 		return nil, err
 	}
-	return &suiteRun{cfg: cfg, out: out, loaded: loaded, exec: exec}, nil
+	return &suiteRun{cfg: cfg, out: out, loaded: loaded, exec: r.Executor}, nil
 }
 
 // finishRun maps the replay outcome to output and exit code. A returned
