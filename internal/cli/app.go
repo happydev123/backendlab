@@ -52,6 +52,7 @@ func (a *App) commands() []command {
 		{"run", "Run a suite against one target and evaluate assertions", runCommand},
 		{"compare", "Run a suite against baseline and candidate targets and compare responses", compareCommand},
 		{"stream", "Inspect server-sent event streams (inspect FILE, probe URL)", streamCommand},
+		{"validate", "Validate extracted JSON documents against rules and schemas", validateCommand},
 		{"version", "Print the version", versionCommand},
 	}
 }
