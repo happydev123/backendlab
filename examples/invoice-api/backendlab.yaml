@@ -1,0 +1,15 @@
+# CLI configuration for running the invoice-api examples against the local
+# mock service (go run ./cmd/mockservice). One process serves both targets
+# under different path prefixes. The mock requires no credentials, so no
+# headers are configured and nothing here is secret.
+version: 1
+output:
+  format: text
+targets:
+  baseline:
+    base_url: http://127.0.0.1:8090/baseline
+  candidate:
+    base_url: http://127.0.0.1:8090/candidate
+limits:
+  request_timeout: 10s
+  max_concurrency: 2

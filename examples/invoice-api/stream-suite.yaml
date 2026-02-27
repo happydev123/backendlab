@@ -1,0 +1,59 @@
+# Server-sent event checks against the mock streams.
+#
+# Expected result against the mock with default flags:
+#   chat        passes; both variants assemble "Grüße aus 日本" even though
+#               the candidate splits the text into different delta events
+#               and every stream is written in deliberately fragmented
+#               pieces (split lines, split CRLF, split UTF-8 characters).
+#   gap         fails: the 3s pause exceeds max_gap.
+#   truncated   fails: the stream ends before the terminal marker.
+version: 1
+name: invoice-api-streams
+description: Check event-stream framing, completion and pacing.
+defaults:
+  timeout: 15s
+  headers:
+    Accept: text/event-stream
+cases:
+  - id: chat
+    method: GET
+    path: /stream/chat
+    expect:
+      status: 200
+      headers:
+        Content-Type: text/event-stream
+    stream:
+      required_events: [delta, done]
+      terminal_event: done
+      terminal_data: "[DONE]"
+      require_terminal: true
+      json_payloads: true
+      max_gap: 2s
+      adapter: chat-delta
+
+  - id: gap
+    method: GET
+    path: /stream/gap
+    query:
+      gap: 3s
+    expect:
+      status: 200
+    stream:
+      required_events: [delta]
+      terminal_data: "[DONE]"
+      require_terminal: true
+      json_payloads: true
+      max_gap: 1s
+      adapter: chat-delta
+
+  - id: truncated
+    method: GET
+    path: /stream/truncated
+    expect:
+      status: 200
+    stream:
+      required_events: [delta]
+      terminal_data: "[DONE]"
+      require_terminal: true
+      json_payloads: true
+      adapter: chat-delta

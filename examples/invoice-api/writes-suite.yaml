@@ -1,0 +1,32 @@
+# A suite with a side effect. The first case is mutating (POST), so the
+# run is refused unless --allow-writes is given, and the case is never
+# retried. The mock applies the increment before its optional delay, so a
+# run interrupted during the 2s delay still leaves the counter changed.
+#
+# Reset the counters between runs with:
+#   curl -X POST http://127.0.0.1:8090/_mock/reset
+version: 1
+name: invoice-api-writes
+description: Exercise a mutating endpoint with an observable side effect.
+defaults:
+  timeout: 5s
+cases:
+  - id: increment
+    method: POST
+    path: /counter/increment
+    query:
+      delay: 2s
+    expect:
+      status: 200
+      json:
+        - pointer: /count
+          type: number
+
+  - id: read-counter
+    method: GET
+    path: /counter
+    expect:
+      status: 200
+      json:
+        - pointer: /count
+          type: number

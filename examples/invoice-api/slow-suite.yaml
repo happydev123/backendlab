@@ -1,0 +1,25 @@
+# Timeout handling. The slow case asks the mock to wait 5s but allows only
+# 1s, so both targets report a transport error (timeout), not an assertion
+# failure. The fast case stays well inside its timeout.
+version: 1
+name: invoice-api-slow
+description: Distinguish timeouts from assertion failures.
+cases:
+  - id: fast
+    method: GET
+    path: /slow
+    query:
+      delay: 50ms
+    timeout: 2s
+    expect:
+      status: 200
+      max_duration: 1s
+
+  - id: slow
+    method: GET
+    path: /slow
+    query:
+      delay: 5s
+    timeout: 1s
+    expect:
+      status: 200

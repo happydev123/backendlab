@@ -1,0 +1,73 @@
+# Structural comparison of the baseline and candidate invoice API.
+#
+# Expected result against the mock with default flags: the run fails with
+# differences on invoice-detail only, namely the changed /total and the
+# renamed customer field (/customer/email removed, /customer/email_address
+# added). The reordered line items and the 4e-7 exchange rate change are
+# absorbed by the unordered and tolerance settings below.
+version: 1
+name: invoice-api-compare
+description: Compare invoice responses between baseline and candidate.
+defaults:
+  timeout: 5s
+  headers:
+    Accept: application/json
+  compare:
+    ignore:
+      - /request_id
+      - /generated_at
+    headers:
+      - Content-Type
+cases:
+  - id: health
+    method: GET
+    path: /health
+    expect:
+      status: 200
+      json:
+        - pointer: /status
+          equals: ok
+
+  - id: list-invoices
+    description: The list is identical in both variants; capture the first ID.
+    method: GET
+    path: /invoices
+    expect:
+      status: 200
+      json:
+        - pointer: /invoices
+          type: array
+    capture:
+      - name: first_invoice_id
+        pointer: /invoices/0/id
+
+  - id: invoice-detail
+    method: GET
+    path: /invoices/{id}
+    path_params:
+      id: ${first_invoice_id}
+    expect:
+      status: 200
+      json:
+        - pointer: /line_items
+          type: array
+        - pointer: /currency
+          matches: ^[A-Z]{3}$
+    compare:
+      path_tolerances:
+        - pointer: /exchange_rate
+          absolute: "0.00001"
+      unordered:
+        - pointer: /line_items
+          key: sku
+
+  - id: invoice-not-found
+    method: GET
+    path: /invoices/{id}
+    path_params:
+      id: inv-9999
+    expect:
+      status: 404
+      json:
+        - pointer: /error
+          exists: true

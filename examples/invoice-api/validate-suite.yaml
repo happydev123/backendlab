@@ -1,0 +1,31 @@
+# Extraction validation of an invoice document. The schema and rules live
+# in examples/invoice and are shared with the offline validate examples.
+#
+# Expected result: the baseline passes. The candidate fails the schema
+# (customer.email is missing) and the total rule (subtotal + tax differs
+# from total by the -invoice-total-delta flag, 0.05 by default).
+version: 1
+name: invoice-api-validate
+description: Validate extracted invoices against a schema and arithmetic rules.
+defaults:
+  timeout: 5s
+cases:
+  - id: invoice-extraction
+    method: GET
+    path: /invoices/{id}
+    path_params:
+      id: inv-1001
+    expect:
+      status: 200
+      schema: ../invoice/invoice.schema.json
+      rules: ../invoice/invoice-rules.yaml
+
+  - id: invoice-extraction-multi-rate
+    method: GET
+    path: /invoices/{id}
+    path_params:
+      id: inv-1002
+    expect:
+      status: 200
+      schema: ../invoice/invoice.schema.json
+      rules: ../invoice/invoice-rules.yaml
