@@ -5,6 +5,17 @@ yet; everything below is unreleased work on the main branch.
 
 ## Unreleased
 
+### Streams and validation
+
+- StreamProbe: incremental SSE parser tolerant of arbitrary chunk
+  boundaries, termination classification, expectations, timed recordings,
+  an optional chat-delta adapter, `backendlab stream inspect` and
+  `backendlab stream probe`.
+- ExtractCheck: declarative rules (required, allowed values, patterns,
+  decimals, sums, products, line items, dates, uniqueness) with decimal
+  arithmetic and explicit tolerance and rounding; `backendlab validate`.
+- Suites can use `expect.schema`, `expect.rules` and `stream` sections.
+
 ### HTTP replay and comparison
 
 - Shared finding and report model with text, JSON and Markdown output.
