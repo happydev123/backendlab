@@ -1,0 +1,68 @@
+[
+  {
+    "Plan": {
+      "Node Type": "Sort",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Startup Cost": 1874.42,
+      "Total Cost": 1880.67,
+      "Plan Rows": 2500,
+      "Plan Width": 45,
+      "Sort Key": ["i.created_at DESC"],
+      "Plans": [
+        {
+          "Node Type": "Hash Join",
+          "Parent Relationship": "Outer",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Join Type": "Inner",
+          "Startup Cost": 38.50,
+          "Total Cost": 1733.31,
+          "Plan Rows": 2500,
+          "Plan Width": 45,
+          "Inner Unique": true,
+          "Hash Cond": "(i.customer_id = c.id)",
+          "Plans": [
+            {
+              "Node Type": "Seq Scan",
+              "Parent Relationship": "Outer",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Relation Name": "invoices",
+              "Alias": "i",
+              "Startup Cost": 0.00,
+              "Total Cost": 1688.00,
+              "Plan Rows": 2500,
+              "Plan Width": 30,
+              "Filter": "(status = 'open'::text)"
+            },
+            {
+              "Node Type": "Hash",
+              "Parent Relationship": "Inner",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Startup Cost": 26.00,
+              "Total Cost": 26.00,
+              "Plan Rows": 1000,
+              "Plan Width": 23,
+              "Plans": [
+                {
+                  "Node Type": "Seq Scan",
+                  "Parent Relationship": "Outer",
+                  "Parallel Aware": false,
+                  "Async Capable": false,
+                  "Relation Name": "customers",
+                  "Alias": "c",
+                  "Startup Cost": 0.00,
+                  "Total Cost": 26.00,
+                  "Plan Rows": 1000,
+                  "Plan Width": 23
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+]
