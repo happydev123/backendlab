@@ -1,0 +1,41 @@
+[
+  {
+    "Plan": {
+      "Node Type": "Aggregate",
+      "Strategy": "Hashed",
+      "Partial Mode": "Simple",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Startup Cost": 2088.00,
+      "Total Cost": 2090.50,
+      "Plan Rows": 250,
+      "Plan Width": 40,
+      "Actual Rows": 243,
+      "Actual Loops": 1,
+      "Group Key": ["customer_id"],
+      "Planned Partitions": 0,
+      "HashAgg Batches": 1,
+      "Peak Memory Usage": 61,
+      "Disk Usage": 0,
+      "Plans": [
+        {
+          "Node Type": "Seq Scan",
+          "Parent Relationship": "Outer",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Relation Name": "invoices",
+          "Alias": "invoices",
+          "Startup Cost": 0.00,
+          "Total Cost": 1688.00,
+          "Plan Rows": 80000,
+          "Plan Width": 12,
+          "Actual Rows": 80000,
+          "Actual Loops": 1
+        }
+      ]
+    },
+    "Planning Time": 0.098,
+    "Triggers": [],
+    "Execution Time": 19.733
+  }
+]
