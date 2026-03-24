@@ -1,0 +1,231 @@
+{
+  "schema": "backendlab.report/v1",
+  "tool": {
+    "name": "backendlab",
+    "version": "test"
+  },
+  "command": "plans.compare",
+  "inputs": [
+    {
+      "kind": "plan",
+      "name": "regress_before.json"
+    },
+    {
+      "kind": "plan",
+      "name": "regress_after.json"
+    }
+  ],
+  "status": "failed",
+  "summary": {
+    "cases": 0,
+    "cases_by_status": {
+      "cancelled": 0,
+      "error": 0,
+      "failed": 0,
+      "inconclusive": 0,
+      "passed": 0,
+      "skipped": 0
+    },
+    "findings": {
+      "total": 10,
+      "failing": 2,
+      "by_kind": {
+        "assertion_failure": 0,
+        "difference": 5,
+        "inconclusive": 0,
+        "observation": 5,
+        "transport_error": 0,
+        "unsupported": 0
+      },
+      "by_severity": {
+        "error": 2,
+        "info": 5,
+        "warning": 3
+      }
+    }
+  },
+  "findings": [
+    {
+      "module": "plans",
+      "code": "plans.execution_time_changed",
+      "kind": "observation",
+      "severity": "info",
+      "location": "/Execution Time",
+      "message": "Execution time changed from 6.903 ms to 108.316 ms (EXPLAIN ANALYZE timing includes instrumentation overhead and single runs vary)",
+      "expected": "6.903 ms",
+      "observed": "108.316 ms",
+      "details": {
+        "planning_time_ms": "0.152 -> 0.187"
+      }
+    },
+    {
+      "module": "plans",
+      "code": "plans.actual_time_changed",
+      "kind": "observation",
+      "severity": "info",
+      "location": "/Plan",
+      "message": "Total time of Sort changed from 6.51 ms to 104.73 ms (per-loop time x loops; EXPLAIN ANALYZE timing includes instrumentation overhead and single runs vary)",
+      "expected": "6.51 ms",
+      "observed": "104.73 ms",
+      "details": {
+        "after_node": "Sort",
+        "before_node": "Sort",
+        "before_path": "/Plan",
+        "match_confidence": "high",
+        "match_reason": "root nodes with the same signature (sort over invoices)"
+      }
+    },
+    {
+      "module": "plans",
+      "code": "plans.buffers_changed",
+      "kind": "observation",
+      "severity": "info",
+      "location": "/Plan",
+      "message": "Root buffer counters changed (blocks, cumulative over the whole plan): shared hit 2980 -> 1210, shared read 41 -> 4310, temp read 0 -> 236, temp written 0 -> 237",
+      "details": {
+        "shared_hit_blocks": "2980 -> 1210",
+        "shared_read_blocks": "41 -> 4310",
+        "temp_read_blocks": "0 -> 236",
+        "temp_written_blocks": "0 -> 237"
+      }
+    },
+    {
+      "module": "plans",
+      "code": "plans.cost_changed",
+      "kind": "observation",
+      "severity": "info",
+      "location": "/Plan",
+      "message": "Estimated total cost changed from 420.36 to 9128.43 (planner cost units, not milliseconds)",
+      "expected": "420.36",
+      "observed": "9128.43"
+    },
+    {
+      "module": "plans",
+      "code": "plans.estimate_mismatch",
+      "kind": "difference",
+      "severity": "warning",
+      "location": "/Plan",
+      "message": "Row estimate for Sort is off by 15.07x (underestimate): estimated 3200 rows per loop, actual 48210 rows per loop over 1 loop",
+      "expected": "3200 rows estimated in total (3200 per loop)",
+      "observed": "48210 rows in total (48210 per loop x 1 loop)",
+      "details": {
+        "after_node": "Sort",
+        "before_mismatch": "false",
+        "before_node": "Sort",
+        "before_path": "/Plan",
+        "before_ratio": "1.05",
+        "direction": "underestimate",
+        "loops": "1",
+        "match_confidence": "high",
+        "match_reason": "root nodes with the same signature (sort over invoices)",
+        "min_rows": "100",
+        "ratio": "15.07",
+        "row_factor": "10"
+      }
+    },
+    {
+      "module": "plans",
+      "code": "plans.sort_spill_introduced",
+      "kind": "difference",
+      "severity": "error",
+      "location": "/Plan",
+      "message": "Sort now spills to disk (it stayed in memory before)",
+      "expected": "Sort Method quicksort, Sort Space 330 kB on Memory",
+      "observed": "Sort Method external merge, Sort Space 1888 kB on Disk",
+      "details": {
+        "after_node": "Sort",
+        "before_node": "Sort",
+        "before_path": "/Plan",
+        "fail_on": "spill",
+        "match_confidence": "high",
+        "match_reason": "root nodes with the same signature (sort over invoices)"
+      }
+    },
+    {
+      "module": "plans",
+      "code": "plans.temp_io_introduced",
+      "kind": "difference",
+      "severity": "warning",
+      "location": "/Plan",
+      "message": "Sort now reads or writes 473 temp blocks (none before)",
+      "expected": "0 temp blocks",
+      "observed": "473 temp blocks",
+      "details": {
+        "after_node": "Sort",
+        "before_node": "Sort",
+        "before_path": "/Plan",
+        "match_confidence": "high",
+        "match_reason": "root nodes with the same signature (sort over invoices)",
+        "temp_read": "236",
+        "temp_written": "237"
+      }
+    },
+    {
+      "module": "plans",
+      "code": "plans.actual_time_changed",
+      "kind": "observation",
+      "severity": "info",
+      "location": "/Plan/Plans/0",
+      "message": "Total time of Seq Scan on invoices changed from 4.88 ms to 71.4 ms (per-loop time x loops; EXPLAIN ANALYZE timing includes instrumentation overhead and single runs vary)",
+      "expected": "4.88 ms",
+      "observed": "71.4 ms",
+      "details": {
+        "after_node": "Seq Scan on invoices",
+        "before_node": "Index Scan using invoices_created_at_idx on invoices",
+        "before_path": "/Plan/Plans/0",
+        "match_confidence": "high",
+        "match_reason": "same signature (scan relation invoices) and parent relationship Outer"
+      }
+    },
+    {
+      "module": "plans",
+      "code": "plans.estimate_mismatch",
+      "kind": "difference",
+      "severity": "warning",
+      "location": "/Plan/Plans/0",
+      "message": "Row estimate for Seq Scan on invoices is off by 15.07x (underestimate): estimated 3200 rows per loop, actual 48210 rows per loop over 1 loop",
+      "expected": "3200 rows estimated in total (3200 per loop)",
+      "observed": "48210 rows in total (48210 per loop x 1 loop)",
+      "details": {
+        "after_node": "Seq Scan on invoices",
+        "before_mismatch": "false",
+        "before_node": "Index Scan using invoices_created_at_idx on invoices",
+        "before_path": "/Plan/Plans/0",
+        "before_ratio": "1.05",
+        "direction": "underestimate",
+        "loops": "1",
+        "match_confidence": "high",
+        "match_reason": "same signature (scan relation invoices) and parent relationship Outer",
+        "min_rows": "100",
+        "ratio": "15.07",
+        "row_factor": "10"
+      }
+    },
+    {
+      "module": "plans",
+      "code": "plans.scan_strategy_changed",
+      "kind": "difference",
+      "severity": "error",
+      "location": "/Plan/Plans/0",
+      "message": "Scan strategy on invoices changed from Index Scan using invoices_created_at_idx to Seq Scan",
+      "expected": "Index Scan using invoices_created_at_idx",
+      "observed": "Seq Scan",
+      "details": {
+        "after_node": "Seq Scan on invoices",
+        "before_node": "Index Scan using invoices_created_at_idx on invoices",
+        "before_path": "/Plan/Plans/0",
+        "fail_on": "scan",
+        "match_confidence": "high",
+        "match_reason": "same signature (scan relation invoices) and parent relationship Outer",
+        "relation": "invoices",
+        "rows_removed_by_filter": "unknown -> 251790"
+      }
+    }
+  ],
+  "limitations": [
+    "Node matching is heuristic (family, relation or object, parent relationship, child order). EXPLAIN output carries no node identity, so a pair may not be the same executor node; each finding lists the match confidence and reason.",
+    "Actual times come from single EXPLAIN ANALYZE runs and include instrumentation overhead; repeat the runs before drawing conclusions from time differences.",
+    "QueryLens does not recommend indexes or schema changes; findings only describe how the two plans differ.",
+    "A plan difference does not by itself explain an HTTP or application latency regression; confirm with measurements of the affected requests."
+  ]
+}

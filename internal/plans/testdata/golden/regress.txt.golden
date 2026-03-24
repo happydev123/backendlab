@@ -1,0 +1,110 @@
+backendlab plans.compare (backendlab test)
+Status: FAILED
+Input: plan regress_before.json
+Input: plan regress_after.json
+
+Findings: 10 (2 failing)
+  [info] observation plans.execution_time_changed at /Execution Time
+      Execution time changed from 6.903 ms to 108.316 ms (EXPLAIN ANALYZE timing includes instrumentation overhead and single runs vary)
+      expected: 6.903 ms
+      observed: 108.316 ms
+      planning_time_ms: 0.152 -> 0.187
+  [info] observation plans.actual_time_changed at /Plan
+      Total time of Sort changed from 6.51 ms to 104.73 ms (per-loop time x loops; EXPLAIN ANALYZE timing includes instrumentation overhead and single runs vary)
+      expected: 6.51 ms
+      observed: 104.73 ms
+      after_node: Sort
+      before_node: Sort
+      before_path: /Plan
+      match_confidence: high
+      match_reason: root nodes with the same signature (sort over invoices)
+  [info] observation plans.buffers_changed at /Plan
+      Root buffer counters changed (blocks, cumulative over the whole plan): shared hit 2980 -> 1210, shared read 41 -> 4310, temp read 0 -> 236, temp written 0 -> 237
+      shared_hit_blocks: 2980 -> 1210
+      shared_read_blocks: 41 -> 4310
+      temp_read_blocks: 0 -> 236
+      temp_written_blocks: 0 -> 237
+  [info] observation plans.cost_changed at /Plan
+      Estimated total cost changed from 420.36 to 9128.43 (planner cost units, not milliseconds)
+      expected: 420.36
+      observed: 9128.43
+  [warning] difference plans.estimate_mismatch at /Plan
+      Row estimate for Sort is off by 15.07x (underestimate): estimated 3200 rows per loop, actual 48210 rows per loop over 1 loop
+      expected: 3200 rows estimated in total (3200 per loop)
+      observed: 48210 rows in total (48210 per loop x 1 loop)
+      after_node: Sort
+      before_mismatch: false
+      before_node: Sort
+      before_path: /Plan
+      before_ratio: 1.05
+      direction: underestimate
+      loops: 1
+      match_confidence: high
+      match_reason: root nodes with the same signature (sort over invoices)
+      min_rows: 100
+      ratio: 15.07
+      row_factor: 10
+  [error] difference plans.sort_spill_introduced at /Plan
+      Sort now spills to disk (it stayed in memory before)
+      expected: Sort Method quicksort, Sort Space 330 kB on Memory
+      observed: Sort Method external merge, Sort Space 1888 kB on Disk
+      after_node: Sort
+      before_node: Sort
+      before_path: /Plan
+      fail_on: spill
+      match_confidence: high
+      match_reason: root nodes with the same signature (sort over invoices)
+  [warning] difference plans.temp_io_introduced at /Plan
+      Sort now reads or writes 473 temp blocks (none before)
+      expected: 0 temp blocks
+      observed: 473 temp blocks
+      after_node: Sort
+      before_node: Sort
+      before_path: /Plan
+      match_confidence: high
+      match_reason: root nodes with the same signature (sort over invoices)
+      temp_read: 236
+      temp_written: 237
+  [info] observation plans.actual_time_changed at /Plan/Plans/0
+      Total time of Seq Scan on invoices changed from 4.88 ms to 71.4 ms (per-loop time x loops; EXPLAIN ANALYZE timing includes instrumentation overhead and single runs vary)
+      expected: 4.88 ms
+      observed: 71.4 ms
+      after_node: Seq Scan on invoices
+      before_node: Index Scan using invoices_created_at_idx on invoices
+      before_path: /Plan/Plans/0
+      match_confidence: high
+      match_reason: same signature (scan relation invoices) and parent relationship Outer
+  [warning] difference plans.estimate_mismatch at /Plan/Plans/0
+      Row estimate for Seq Scan on invoices is off by 15.07x (underestimate): estimated 3200 rows per loop, actual 48210 rows per loop over 1 loop
+      expected: 3200 rows estimated in total (3200 per loop)
+      observed: 48210 rows in total (48210 per loop x 1 loop)
+      after_node: Seq Scan on invoices
+      before_mismatch: false
+      before_node: Index Scan using invoices_created_at_idx on invoices
+      before_path: /Plan/Plans/0
+      before_ratio: 1.05
+      direction: underestimate
+      loops: 1
+      match_confidence: high
+      match_reason: same signature (scan relation invoices) and parent relationship Outer
+      min_rows: 100
+      ratio: 15.07
+      row_factor: 10
+  [error] difference plans.scan_strategy_changed at /Plan/Plans/0
+      Scan strategy on invoices changed from Index Scan using invoices_created_at_idx to Seq Scan
+      expected: Index Scan using invoices_created_at_idx
+      observed: Seq Scan
+      after_node: Seq Scan on invoices
+      before_node: Index Scan using invoices_created_at_idx on invoices
+      before_path: /Plan/Plans/0
+      fail_on: scan
+      match_confidence: high
+      match_reason: same signature (scan relation invoices) and parent relationship Outer
+      relation: invoices
+      rows_removed_by_filter: unknown -> 251790
+
+Limitations:
+  - Node matching is heuristic (family, relation or object, parent relationship, child order). EXPLAIN output carries no node identity, so a pair may not be the same executor node; each finding lists the match confidence and reason.
+  - Actual times come from single EXPLAIN ANALYZE runs and include instrumentation overhead; repeat the runs before drawing conclusions from time differences.
+  - QueryLens does not recommend indexes or schema changes; findings only describe how the two plans differ.
+  - A plan difference does not by itself explain an HTTP or application latency regression; confirm with measurements of the affected requests.

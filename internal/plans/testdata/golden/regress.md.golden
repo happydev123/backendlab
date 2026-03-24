@@ -1,0 +1,38 @@
+# BackendLab report: plans\.compare
+
+- Status: **failed**
+- Tool: backendlab `test`
+- Schema: `backendlab.report/v1`
+- Input (plan): `regress_before.json`
+- Input (plan): `regress_after.json`
+
+## Summary
+
+| Measure | Count |
+|---|---|
+| Findings | 10 |
+| Failing findings | 2 |
+| difference | 5 |
+| observation | 5 |
+
+## Findings
+
+| Severity | Kind | Code | Case | Location | Explanation |
+|---|---|---|---|---|---|
+| info | observation | `plans.execution_time_changed` |  | `/Execution Time` | Execution time changed from 6\.903 ms to 108\.316 ms \(EXPLAIN ANALYZE timing includes instrumentation overhead and single runs vary\); expected `6.903 ms`; observed `108.316 ms` |
+| info | observation | `plans.actual_time_changed` |  | `/Plan` | Total time of Sort changed from 6\.51 ms to 104\.73 ms \(per\-loop time x loops; EXPLAIN ANALYZE timing includes instrumentation overhead and single runs vary\); expected `6.51 ms`; observed `104.73 ms` |
+| info | observation | `plans.buffers_changed` |  | `/Plan` | Root buffer counters changed \(blocks, cumulative over the whole plan\): shared hit 2980 \-\> 1210, shared read 41 \-\> 4310, temp read 0 \-\> 236, temp written 0 \-\> 237 |
+| info | observation | `plans.cost_changed` |  | `/Plan` | Estimated total cost changed from 420\.36 to 9128\.43 \(planner cost units, not milliseconds\); expected `420.36`; observed `9128.43` |
+| warning | difference | `plans.estimate_mismatch` |  | `/Plan` | Row estimate for Sort is off by 15\.07x \(underestimate\): estimated 3200 rows per loop, actual 48210 rows per loop over 1 loop; expected `3200 rows estimated in total (3200 per loop)`; observed `48210 rows in total (48210 per loop x 1 loop)` |
+| error | difference | `plans.sort_spill_introduced` |  | `/Plan` | Sort now spills to disk \(it stayed in memory before\); expected `Sort Method quicksort, Sort Space 330 kB on Memory`; observed `Sort Method external merge, Sort Space 1888 kB on Disk` |
+| warning | difference | `plans.temp_io_introduced` |  | `/Plan` | Sort now reads or writes 473 temp blocks \(none before\); expected `0 temp blocks`; observed `473 temp blocks` |
+| info | observation | `plans.actual_time_changed` |  | `/Plan/Plans/0` | Total time of Seq Scan on invoices changed from 4\.88 ms to 71\.4 ms \(per\-loop time x loops; EXPLAIN ANALYZE timing includes instrumentation overhead and single runs vary\); expected `4.88 ms`; observed `71.4 ms` |
+| warning | difference | `plans.estimate_mismatch` |  | `/Plan/Plans/0` | Row estimate for Seq Scan on invoices is off by 15\.07x \(underestimate\): estimated 3200 rows per loop, actual 48210 rows per loop over 1 loop; expected `3200 rows estimated in total (3200 per loop)`; observed `48210 rows in total (48210 per loop x 1 loop)` |
+| error | difference | `plans.scan_strategy_changed` |  | `/Plan/Plans/0` | Scan strategy on invoices changed from Index Scan using invoices\_created\_at\_idx to Seq Scan; expected `Index Scan using invoices_created_at_idx`; observed `Seq Scan` |
+
+## Limitations
+
+- Node matching is heuristic \(family, relation or object, parent relationship, child order\)\. EXPLAIN output carries no node identity, so a pair may not be the same executor node; each finding lists the match confidence and reason\.
+- Actual times come from single EXPLAIN ANALYZE runs and include instrumentation overhead; repeat the runs before drawing conclusions from time differences\.
+- QueryLens does not recommend indexes or schema changes; findings only describe how the two plans differ\.
+- A plan difference does not by itself explain an HTTP or application latency regression; confirm with measurements of the affected requests\.
