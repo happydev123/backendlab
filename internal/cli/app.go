@@ -53,6 +53,7 @@ func (a *App) commands() []command {
 		{"compare", "Run a suite against baseline and candidate targets and compare responses", compareCommand},
 		{"stream", "Inspect server-sent event streams (inspect FILE, probe URL)", streamCommand},
 		{"validate", "Validate extracted JSON documents against rules and schemas", validateCommand},
+		{"plans", "Compare two supplied PostgreSQL EXPLAIN (FORMAT JSON) plans", plansCommand},
 		{"version", "Print the version", versionCommand},
 	}
 }
