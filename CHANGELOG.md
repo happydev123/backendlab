@@ -5,6 +5,15 @@ yet; everything below is unreleased work on the main branch.
 
 ## Unreleased
 
+### Query plans
+
+- QueryLens: parsing of PostgreSQL `EXPLAIN (FORMAT JSON)` output, estimated
+  and analyzed, with missing metrics kept as unknown.
+- Node matching heuristic with recorded reasons; scan and join strategy
+  changes, estimate mismatches, spills, temporary I/O and structure changes;
+  cost, time and buffer observations.
+- `backendlab plans compare` with opt-in `--fail-on` classes.
+
 ### Streams and validation
 
 - StreamProbe: incremental SSE parser tolerant of arbitrary chunk
