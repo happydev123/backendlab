@@ -26,3 +26,29 @@ jobs:
         run: make race
       - name: Build
         run: make build
+
+  integration:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: backendlab_test
+          POSTGRES_USER: backendlab
+          POSTGRES_PASSWORD: backendlab
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U backendlab -d backendlab_test"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+    env:
+      BACKENDLAB_TEST_DATABASE_URL: postgres://backendlab:backendlab@localhost:5432/backendlab_test?sslmode=disable
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: PostgreSQL integration tests
+        run: make integration
