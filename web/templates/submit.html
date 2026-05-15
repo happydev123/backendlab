@@ -1,0 +1,90 @@
+{{define "content"}}
+{{$csrf := .CSRFToken}}
+{{with .Content}}
+<h1>Submit a run</h1>
+<p>Runs execute approved suites from the server's suites directory against targets defined in the server configuration.
+Targets, credentials and the write policy cannot be changed here.</p>
+{{with .Error}}<p class="error" role="alert">{{.}}</p>{{end}}
+{{if .Suites}}
+{{$form := .Form}}
+<form method="post" action="/runs" class="stack">
+  <input type="hidden" name="csrf_token" value="{{$csrf}}">
+  <fieldset>
+    <legend>Suite</legend>
+    {{- range $i, $s := .Suites}}
+    <div class="choice">
+      <input type="radio" id="suite-{{$i}}" name="suite" value="{{$s.File}}" required{{if eq $s.File $form.Suite}} checked{{end}}>
+      <label for="suite-{{$i}}">{{$s.Name}} <span class="muted">{{$s.File}}, {{$s.Cases}} cases</span>
+        {{- if $s.Mutating}} <span class="tag">mutating: {{join $s.MutatingCases ", "}}</span>{{end}}</label>
+      {{with $s.Description}}<p class="hint">{{.}}</p>{{end}}
+    </div>
+    {{- end}}
+  </fieldset>
+  <fieldset>
+    <legend>Mode</legend>
+    <div class="choice">
+      <input type="radio" id="mode-run" name="mode" value="run"{{if ne $form.Mode "compare"}} checked{{end}}>
+      <label for="mode-run">Run: execute against one target and check expectations</label>
+    </div>
+    <div class="choice">
+      <input type="radio" id="mode-compare" name="mode" value="compare"{{if eq $form.Mode "compare"}} checked{{end}}>
+      <label for="mode-compare">Compare: execute against a baseline and a candidate and compare responses</label>
+    </div>
+  </fieldset>
+  <fieldset>
+    <legend>Targets</legend>
+    <label for="target">Target (run mode)</label>
+    <select id="target" name="target">
+      {{- range .Targets}}
+      <option value="{{.}}"{{if eq . $form.Target}} selected{{end}}>{{.}}</option>
+      {{- end}}
+    </select>
+    <label for="baseline">Baseline (compare mode)</label>
+    <select id="baseline" name="baseline">
+      {{- range .Targets}}
+      <option value="{{.}}"{{if eq . $form.Baseline}} selected{{end}}>{{.}}</option>
+      {{- end}}
+    </select>
+    <label for="candidate">Candidate (compare mode)</label>
+    <select id="candidate" name="candidate">
+      {{- range .Targets}}
+      <option value="{{.}}"{{if eq . $form.Candidate}} selected{{end}}>{{.}}</option>
+      {{- end}}
+    </select>
+  </fieldset>
+  {{if .AllowWrites}}
+  <fieldset>
+    <legend>Writes</legend>
+    <div class="choice">
+      <input type="checkbox" id="allow_writes" name="allow_writes" value="1" aria-describedby="writes-warning"{{if $form.AllowWrites}} checked{{end}}>
+      <label for="allow_writes">Allow writes for this run (required for suites with mutating cases)</label>
+    </div>
+    <p id="writes-warning" class="warning">Mutating cases send POST, PUT, PATCH or DELETE requests that change upstream state.
+    Cancelling a run stops further requests but does not undo side effects of requests already sent.
+    Mutating runs are never retried automatically; an interrupted mutating run needs your review before it is resubmitted.</p>
+  </fieldset>
+  {{else}}
+  <p class="muted">The server configuration does not allow writes, so suites with mutating cases cannot be submitted.</p>
+  {{end}}
+  <button type="submit">Submit run</button>
+</form>
+{{else}}
+<p class="empty">No approved suites are available. Add suite files (*.yaml) to the suites directory and restart the server.</p>
+{{end}}
+{{if .Problems}}
+<section aria-labelledby="problems-heading">
+  <h2 id="problems-heading">Suites that failed to load</h2>
+  <div class="scroll">
+  <table>
+    <thead><tr><th scope="col">File</th><th scope="col">Problem</th></tr></thead>
+    <tbody>
+    {{- range .Problems}}
+      <tr><td>{{.File}}</td><td><pre>{{.Error}}</pre></td></tr>
+    {{- end}}
+    </tbody>
+  </table>
+  </div>
+</section>
+{{end}}
+{{end}}
+{{end}}

@@ -1,0 +1,39 @@
+{{define "outcome-legend"}}
+<p class="legend">Outcome labels: <strong>Failure</strong> findings have severity error and fail the run.
+<strong>Inconclusive</strong> and <strong>Unsupported</strong> mean the check could not reach a conclusion.
+<strong>Observation</strong> and <strong>Note</strong> record facts that are not judged.
+<strong>Warning</strong> marks a reported difference that does not fail the run.</p>
+{{end}}
+
+{{define "findings-table"}}
+<div class="scroll">
+<table class="findings">
+  <thead>
+    <tr>
+      <th scope="col">Outcome</th>
+      <th scope="col">Case</th>
+      <th scope="col">Kind</th>
+      <th scope="col">Code</th>
+      <th scope="col">Location</th>
+      <th scope="col">Message</th>
+      <th scope="col">Expected</th>
+      <th scope="col">Observed</th>
+    </tr>
+  </thead>
+  <tbody>
+  {{- range .}}
+    <tr class="row-{{.Class}}">
+      <td><span class="label label-{{.Class}}">{{.Label}}</span></td>
+      <td>{{.F.CaseID}}</td>
+      <td>{{.F.Kind}}</td>
+      <td><code>{{.F.Code}}</code></td>
+      <td>{{with .F.Location}}<code>{{.}}</code>{{end}}</td>
+      <td>{{.F.Message}}{{range $k, $v := .F.Details}}<br><span class="detail">{{$k}}: {{$v}}</span>{{end}}</td>
+      <td>{{with .F.Expected}}<code>{{.}}</code>{{end}}</td>
+      <td>{{with .F.Observed}}<code>{{.}}</code>{{end}}</td>
+    </tr>
+  {{- end}}
+  </tbody>
+</table>
+</div>
+{{end}}

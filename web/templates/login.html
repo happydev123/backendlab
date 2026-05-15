@@ -1,0 +1,9 @@
+{{define "content"}}
+<h1>Sign in</h1>
+{{with .Content.Error}}<p class="error" role="alert">{{.}}</p>{{end}}
+<form method="post" action="/login" class="stack narrow">
+  <label for="password">Operator password</label>
+  <input id="password" name="password" type="password" autocomplete="current-password" required>
+  <button type="submit">Sign in</button>
+</form>
+{{end}}

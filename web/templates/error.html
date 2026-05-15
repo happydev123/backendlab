@@ -1,0 +1,5 @@
+{{define "content"}}
+<h1>{{.Content.Heading}}</h1>
+<p role="alert">{{.Content.Message}}</p>
+<p>{{if .LoggedIn}}<a href="/runs">Back to the run list</a>{{else}}<a href="/login">Sign in</a>{{end}}</p>
+{{end}}

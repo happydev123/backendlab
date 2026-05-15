@@ -1,0 +1,36 @@
+{{define "layout"}}<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{.Title}} - BackendLab</title>
+<link rel="stylesheet" href="/static/app.css">
+<script src="/static/app.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+<header class="site">
+  <span class="brand">BackendLab</span>
+  {{- if .LoggedIn}}
+  <nav aria-label="Main">
+    <ul>
+      <li><a href="/runs"{{if eq .Active "runs"}} aria-current="page"{{end}}>Runs</a></li>
+      <li><a href="/runs/new"{{if eq .Active "submit"}} aria-current="page"{{end}}>Submit run</a></li>
+      <li><a href="/plans"{{if eq .Active "plans"}} aria-current="page"{{end}}>Compare plans</a></li>
+    </ul>
+  </nav>
+  <form method="post" action="/logout" class="logout">
+    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+    <button type="submit">Sign out</button>
+  </form>
+  {{- end}}
+</header>
+<main id="main"{{if .Refresh}} data-refresh="5"{{end}}>
+{{template "content" .}}
+</main>
+<footer class="site">
+  <p>Single-operator server. Request ID <code>{{.RequestID}}</code></p>
+</footer>
+</body>
+</html>
+{{end}}

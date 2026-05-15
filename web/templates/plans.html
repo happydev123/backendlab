@@ -1,0 +1,61 @@
+{{define "content"}}
+{{$csrf := .CSRFToken}}
+{{with .Content}}
+<h1>Compare query plans</h1>
+<p>Upload two PostgreSQL <code>EXPLAIN (FORMAT JSON)</code> outputs for the same statement. The plans are compared in memory;
+nothing is stored and no SQL is executed. Each file may be at most {{.MaxBytes}} bytes.</p>
+{{with .Error}}<p class="error" role="alert">{{.}}</p>{{end}}
+<form method="post" action="/plans" enctype="multipart/form-data" class="stack">
+  <input type="hidden" name="csrf_token" value="{{$csrf}}">
+  <label for="before">Before plan (JSON file)</label>
+  <input id="before" name="before" type="file" accept=".json,application/json" required>
+  <label for="after">After plan (JSON file)</label>
+  <input id="after" name="after" type="file" accept=".json,application/json" required>
+  <button type="submit">Compare plans</button>
+</form>
+
+{{with .Result}}
+<section aria-labelledby="result-heading">
+  <h2 id="result-heading">Comparison of {{.BeforeName}} and {{.AfterName}}</h2>
+  <p>Report status: <span class="status status-{{.Status}}">{{.Status}}</span>. Unknown values mean the plan does not contain the metric
+  (for example timings of a plan captured without ANALYZE); they are not zero.</p>
+  <div class="scroll">
+  <table>
+    <caption>Plan summaries</caption>
+    <thead>
+      <tr><th scope="col">Measure</th><th scope="col">Before</th><th scope="col">After</th></tr>
+    </thead>
+    <tbody>
+      <tr><th scope="row">Nodes</th><td>{{.Before.NodeCount}}</td><td>{{.After.NodeCount}}</td></tr>
+      <tr><th scope="row">Captured with ANALYZE</th><td>{{yesno .Before.Analyzed}}</td><td>{{yesno .After.Analyzed}}</td></tr>
+      <tr><th scope="row">Total cost (planner units)</th><td>{{num .Before.TotalCost}}</td><td>{{num .After.TotalCost}}</td></tr>
+      <tr><th scope="row">Estimated rows</th><td>{{num .Before.PlanRows}}</td><td>{{num .After.PlanRows}}</td></tr>
+      <tr><th scope="row">Actual rows</th><td>{{num .Before.ActualRows}}</td><td>{{num .After.ActualRows}}</td></tr>
+      <tr><th scope="row">Execution time (ms)</th><td>{{num .Before.ExecutionTime}}</td><td>{{num .After.ExecutionTime}}</td></tr>
+      <tr><th scope="row">Relations</th><td>{{join .Before.Relations ", "}}</td><td>{{join .After.Relations ", "}}</td></tr>
+      <tr><th scope="row">Scan strategies</th><td>{{counts .Before.ScanStrategies}}</td><td>{{counts .After.ScanStrategies}}</td></tr>
+      <tr><th scope="row">Join strategies</th><td>{{counts .Before.JoinStrategies}}</td><td>{{counts .After.JoinStrategies}}</td></tr>
+      <tr><th scope="row">Nodes that spilled to disk</th><td>{{.Before.Spills}}</td><td>{{.After.Spills}}</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <h3>Findings</h3>
+  {{if .Rows}}
+  {{template "outcome-legend"}}
+  {{template "findings-table" .Rows}}
+  {{if .Dropped}}<p class="warning">{{.Dropped}} further findings were left out by the findings limit.</p>{{end}}
+  {{else}}
+  <p class="empty">The plans show no differences that QueryLens reports.</p>
+  {{end}}
+  {{if .Limitations}}
+  <h3>Limitations</h3>
+  <ul>
+  {{- range .Limitations}}
+    <li>{{.}}</li>
+  {{- end}}
+  </ul>
+  {{end}}
+</section>
+{{end}}
+{{end}}
+{{end}}

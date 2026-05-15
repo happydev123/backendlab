@@ -1,0 +1,55 @@
+{{define "content"}}
+{{with .Content}}
+<h1>Runs</h1>
+<form method="get" action="/runs" class="inline">
+  <label for="status">Status</label>
+  <select id="status" name="status">
+    <option value="">All statuses</option>
+    {{- range .Statuses}}
+    <option value="{{.Value}}"{{if .Selected}} selected{{end}}>{{.Label}}</option>
+    {{- end}}
+  </select>
+  <button type="submit">Filter</button>
+</form>
+{{if .Runs}}
+<div class="scroll">
+<table>
+  <caption>{{.Total}} {{if eq .Total 1}}run{{else}}runs{{end}}{{with .FilterLabel}} with status {{.}}{{end}}, newest first</caption>
+  <thead>
+    <tr>
+      <th scope="col">Run</th>
+      <th scope="col">Suite</th>
+      <th scope="col">Mode</th>
+      <th scope="col">Targets</th>
+      <th scope="col">Status</th>
+      <th scope="col">Cases</th>
+      <th scope="col">Created</th>
+      <th scope="col">Finished</th>
+    </tr>
+  </thead>
+  <tbody>
+  {{- range .Runs}}
+    <tr>
+      <td><a href="/runs/{{.PublicID}}">{{.PublicID}}</a></td>
+      <td>{{.SuiteName}} <span class="muted">{{.SuiteFile}}</span>{{if .Mutating}} <span class="tag">mutating</span>{{end}}</td>
+      <td>{{.Mode}}</td>
+      <td>{{join .Targets ", "}}</td>
+      <td><span class="status status-{{.Status}}">{{statusLabel .Status}}</span>{{if .CancelRequested}}{{if eq .Status "running"}} <span class="muted">cancel requested</span>{{end}}{{end}}</td>
+      <td>{{with .Summary}}{{.Cases}}{{else}}<span class="muted">none yet</span>{{end}}</td>
+      <td>{{when .CreatedAt}}</td>
+      <td>{{when .FinishedAt}}</td>
+    </tr>
+  {{- end}}
+  </tbody>
+</table>
+</div>
+<nav aria-label="Pagination" class="pager">
+  {{with .PrevURL}}<a href="{{.}}" rel="prev">Previous page</a>{{end}}
+  <span>Page {{.Page}} of {{.Pages}}</span>
+  {{with .NextURL}}<a href="{{.}}" rel="next">Next page</a>{{end}}
+</nav>
+{{else}}
+<p class="empty">{{.EmptyMessage}} <a href="/runs/new">Submit a run</a>.</p>
+{{end}}
+{{end}}
+{{end}}

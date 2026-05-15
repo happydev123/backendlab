@@ -1,0 +1,139 @@
+{{define "content"}}
+{{$csrf := .CSRFToken}}
+{{with .Content}}
+<h1>Run <code>{{.Run.PublicID}}</code></h1>
+<dl class="meta">
+  <dt>Status</dt>
+  <dd><span class="status status-{{.Run.Status}}">{{statusLabel .Run.Status}}</span>
+    {{- if .CancelPending}} <span class="muted">cancellation requested; the worker stops the run at its next heartbeat</span>{{end}}</dd>
+  <dt>Suite</dt>
+  <dd>{{.Run.SuiteName}} <span class="muted">{{.Run.SuiteFile}}</span><br><span class="muted">SHA-256 <code>{{.Run.SuiteSHA256}}</code></span></dd>
+  <dt>Mode</dt>
+  <dd>{{.Run.Mode}}</dd>
+  <dt>Targets</dt>
+  <dd>{{join .Run.Targets ", "}}{{if eq .Run.Mode "compare"}} <span class="muted">(baseline, candidate)</span>{{end}}</dd>
+  <dt>Writes</dt>
+  <dd>{{if .Run.Mutating}}Mutating suite, writes requested{{else}}Read-only suite{{end}}</dd>
+  <dt>Attempt</dt>
+  <dd>{{.Run.Attempt}} of at most {{.Run.MaxAttempts}}</dd>
+  <dt>Created</dt>
+  <dd>{{when .Run.CreatedAt}}</dd>
+  <dt>Started</dt>
+  <dd>{{when .Run.StartedAt}}</dd>
+  <dt>Finished</dt>
+  <dd>{{when .Run.FinishedAt}}</dd>
+  {{- with .ResubmittedFrom}}
+  <dt>Resubmitted from</dt>
+  <dd><a href="/runs/{{.}}">{{.}}</a></dd>
+  {{- end}}
+  {{- with .Run.Error}}
+  <dt>Error</dt>
+  <dd class="error-text">{{.}}</dd>
+  {{- end}}
+</dl>
+
+{{if .Active}}
+<p class="notice">This run is {{statusLabel .Run.Status}}. <a href="/runs/{{.Run.PublicID}}">Refresh this page</a> to see progress; with scripts enabled it refreshes every 5 seconds.</p>
+{{end}}
+
+{{if or .Cancellable .Resubmittable}}
+<div class="actions">
+  {{- if .Cancellable}}
+  <form method="post" action="/runs/{{.Run.PublicID}}/cancel" data-confirm="Cancel run {{.Run.PublicID}}? Requests already sent are not undone.">
+    <input type="hidden" name="csrf_token" value="{{$csrf}}">
+    <button type="submit" class="danger">Cancel run</button>
+  </form>
+  <p class="hint">Cancellation stops further requests. It does not undo side effects of requests already sent.</p>
+  {{- end}}
+  {{- if .Resubmittable}}
+  <form method="post" action="/runs/{{.Run.PublicID}}/resubmit" data-confirm="Resubmit the stored suite snapshot of {{.Run.PublicID}} as a new run?">
+    <input type="hidden" name="csrf_token" value="{{$csrf}}">
+    <button type="submit">Resubmit as a new run</button>
+  </form>
+  <p class="hint">Resubmission re-executes the stored suite snapshot{{if .Run.Mutating}}, including its mutating requests{{end}}. It is refused if the suite file changed since submission.</p>
+  {{- end}}
+</div>
+{{end}}
+
+{{if .HasReport}}
+<section aria-labelledby="report-heading">
+  <h2 id="report-heading">Report</h2>
+  <ul class="downloads">
+    <li><a href="/api/v1/runs/{{.Run.PublicID}}/report?format=json" download>Download JSON report</a></li>
+    <li><a href="/api/v1/runs/{{.Run.PublicID}}/report?format=markdown" download>Download Markdown report</a></li>
+    <li><a href="/api/v1/runs/{{.Run.PublicID}}/report?format=text" download>Download text report</a></li>
+  </ul>
+  {{if .Run.ReportTruncated}}<p class="warning">The stored report was reduced because it exceeded the report size limit. The case results below are complete.</p>{{end}}
+</section>
+{{end}}
+
+<section aria-labelledby="cases-heading">
+  <h2 id="cases-heading">Case results</h2>
+  {{with .CaseCounts}}<p>{{range $i, $c := .}}{{if $i}}, {{end}}{{$c.Label}}: {{$c.Count}}{{end}}</p>{{end}}
+  {{if .Cases}}
+  <div class="scroll">
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Case</th>
+        <th scope="col">Status</th>
+        <th scope="col">Observations</th>
+        <th scope="col">Findings</th>
+      </tr>
+    </thead>
+    <tbody>
+    {{- range .Cases}}
+      <tr>
+        <td>{{.Index}}</td>
+        <td>{{.ID}}</td>
+        <td><span class="case case-{{.Status}}">{{caseLabel .Status}}</span></td>
+        <td>
+          {{- if .Observations}}
+          <ul class="plain">
+          {{- range .Observations}}
+            <li>{{.Target}}: {{if .StatusCode}}HTTP {{.StatusCode}}{{else}}no status{{end}}, {{ms .DurationMS}}
+              {{- if .Events}}, {{.Events}} events{{end}}{{with .Error}}, error: {{.}}{{end}}</li>
+          {{- end}}
+          </ul>
+          {{- else}}<span class="muted">none</span>{{end}}
+        </td>
+        <td>{{.FindingCount}}{{if .Dropped}} <span class="muted">({{.Dropped}} more not stored)</span>{{end}}</td>
+      </tr>
+      {{- if .Bodies}}
+      <tr>
+        <td colspan="5">
+          <details>
+            <summary>Retained response bodies for {{.ID}}</summary>
+            {{- range .Bodies}}
+            <h3 class="small">{{.Target}}</h3>
+            <pre>{{.Body}}</pre>
+            {{- end}}
+          </details>
+        </td>
+      </tr>
+      {{- end}}
+    {{- end}}
+    </tbody>
+  </table>
+  </div>
+  {{else}}
+  <p class="empty">No case results have been recorded yet.</p>
+  {{end}}
+</section>
+
+<section aria-labelledby="findings-heading">
+  <h2 id="findings-heading">Findings</h2>
+  {{if .Groups}}
+  {{with .OutcomeCounts}}<p>{{range $i, $c := .}}{{if $i}}, {{end}}{{$c.Label}}: {{$c.Count}}{{end}}</p>{{end}}
+  {{template "outcome-legend"}}
+  {{range .Groups}}
+  <h3 id="module-{{.Module}}">{{.Title}} <span class="muted">({{len .Rows}})</span></h3>
+  {{template "findings-table" .Rows}}
+  {{end}}
+  {{else}}
+  <p class="empty">No findings were recorded{{if .Active}} yet{{end}}.</p>
+  {{end}}
+</section>
+{{end}}
+{{end}}
