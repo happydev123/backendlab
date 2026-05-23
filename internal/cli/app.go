@@ -54,6 +54,7 @@ func (a *App) commands() []command {
 		{"stream", "Inspect server-sent event streams (inspect FILE, probe URL)", streamCommand},
 		{"validate", "Validate extracted JSON documents against rules and schemas", validateCommand},
 		{"plans", "Compare two supplied PostgreSQL EXPLAIN (FORMAT JSON) plans", plansCommand},
+		{"serve", "Run the authenticated API and dashboard (server mode)", serveCommand},
 		{"migrate", "Apply database migrations (server mode)", migrateCommand},
 		{"worker", "Execute queued background runs (server mode)", workerCommand},
 		{"hash-password", "Hash the operator password read from stdin", hashPasswordCommand},
