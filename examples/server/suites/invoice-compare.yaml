@@ -1,0 +1,51 @@
+# Read-only comparison of the baseline and candidate invoice API (mock
+# service). Submit in compare mode with targets baseline, candidate.
+version: 1
+name: invoice-api-compare
+description: Compare invoice responses between baseline and candidate.
+defaults:
+  timeout: 5s
+  headers:
+    Accept: application/json
+  compare:
+    ignore:
+      - /request_id
+      - /generated_at
+    headers:
+      - Content-Type
+cases:
+  - id: health
+    method: GET
+    path: /health
+    expect:
+      status: 200
+      json:
+        - pointer: /status
+          equals: ok
+
+  - id: list-invoices
+    method: GET
+    path: /invoices
+    expect:
+      status: 200
+      json:
+        - pointer: /invoices
+          type: array
+    capture:
+      - name: first_invoice_id
+        pointer: /invoices/0/id
+
+  - id: invoice-detail
+    method: GET
+    path: /invoices/{id}
+    path_params:
+      id: ${first_invoice_id}
+    expect:
+      status: 200
+    compare:
+      path_tolerances:
+        - pointer: /exchange_rate
+          absolute: "0.00001"
+      unordered:
+        - pointer: /line_items
+          key: sku

@@ -1,0 +1,89 @@
+# Server configuration for "backendlab serve", "backendlab worker",
+# "backendlab migrate" and "backendlab retention cleanup".
+#
+# This example points at the local mock service (go run ./cmd/mockservice),
+# which serves a baseline and a candidate variant on 127.0.0.1:8090. Run the
+# commands from the repository root so suites_dir resolves. Nothing in this
+# file is secret: the database URL, the operator password hash and target
+# credentials are read from environment variables named here.
+version: 1
+
+# Address the HTTP server listens on. Keep it on loopback unless a TLS
+# reverse proxy sits in front of it.
+listen: 127.0.0.1:8080
+
+database:
+  url_env: BACKENDLAB_DATABASE_URL   # variable holding postgres://...
+  max_conns: 10                      # pool size per process (serve and each worker)
+  min_conns: 0
+  max_conn_lifetime: 1h
+  max_conn_idle_time: 10m
+
+# Approved suites: *.yaml / *.yml files directly in this directory. Relative
+# paths resolve against the working directory of the process.
+suites_dir: examples/server/suites
+
+# Targets runs may use. Submissions choose target names only; they can never
+# supply a URL or a credential.
+targets:
+  baseline:
+    base_url: http://127.0.0.1:8090/baseline
+  candidate:
+    base_url: http://127.0.0.1:8090/candidate
+    headers:
+      Accept: application/json
+      # A credential header reads an allowed environment variable:
+      # Authorization:
+      #   env: CANDIDATE_API_TOKEN
+      #   prefix: "Bearer "
+
+credentials:
+  # Environment variables target headers may read (none are needed for the
+  # mock). Must not include the database or password-hash variables.
+  allowed_env: []
+
+egress:
+  allow_hosts:
+    - 127.0.0.1:8090
+  allow_cidrs: []
+  allow_loopback: true   # development only; the mock runs on loopback
+
+# Suites with mutating cases (POST, PUT, PATCH, DELETE) need this AND an
+# explicit allow_writes on each submission.
+allow_writes: true
+
+worker:
+  concurrency: 2
+  lease_duration: 30s
+  heartbeat_interval: 10s        # at most half of lease_duration
+  poll_interval: 2s
+  max_read_only_attempts: 2      # 1-5; mutating runs always get 1
+
+auth:
+  password_hash_env: BACKENDLAB_ADMIN_PASSWORD_HASH
+  session_ttl: 12h
+  # Secure cookies are on by default. Turn them off only for plain-HTTP
+  # development on localhost; browsers drop Secure cookies over HTTP.
+  secure_cookies: false
+  login_max_attempts: 5
+  login_window: 15m
+
+retention:
+  run_max_age: 720h          # used by "backendlab retention cleanup"
+  retain_raw_bodies: false   # store redacted response bodies with case results
+  raw_body_max_bytes: 65536
+
+limits:
+  request_timeout: 10s
+  run_timeout: 10m
+  max_report_bytes: 4194304
+  max_plan_bytes: 16777216
+
+redact:
+  headers: []
+  keys: [tax_id]
+  json_paths: [/customer/email]
+
+log:
+  level: info
+  format: json

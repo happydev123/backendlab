@@ -1,0 +1,25 @@
+# A suite with a side effect. The first case is mutating (POST), so the
+# server accepts it only when allow_writes is true in the server
+# configuration and the submission sets allow_writes. Runs of this suite are
+# never retried automatically, and cancelling one does not undo an increment
+# that was already sent.
+version: 1
+name: invoice-api-writes
+description: Exercise a mutating endpoint with an observable side effect.
+defaults:
+  timeout: 5s
+cases:
+  - id: increment
+    method: POST
+    path: /counter/increment
+    expect:
+      status: 200
+      json:
+        - pointer: /count
+          type: number
+
+  - id: read-counter
+    method: GET
+    path: /counter
+    expect:
+      status: 200
