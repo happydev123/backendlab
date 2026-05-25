@@ -26,6 +26,8 @@ jobs:
         run: make race
       - name: Build
         run: make build
+      - name: Fuzz smoke
+        run: make fuzz-smoke FUZZTIME=5s
 
   integration:
     runs-on: ubuntu-latest
@@ -52,3 +54,5 @@ jobs:
           go-version-file: go.mod
       - name: PostgreSQL integration tests
         run: make integration
+      - name: Demonstration scenario
+        run: make demo
