@@ -1,0 +1,34 @@
+# Server configuration used by docker-compose.yml. Targets point at the
+# demonstration service on the internal compose network. Replace them with
+# your own environments for real use.
+version: 1
+listen: 0.0.0.0:8080
+suites_dir: /etc/backendlab/suites
+database:
+  url_env: BACKENDLAB_DATABASE_URL
+  max_conns: 10
+  min_conns: 1
+targets:
+  baseline:
+    base_url: http://mock:8090/baseline
+  candidate:
+    base_url: http://mock:8090/candidate
+egress:
+  # The compose network uses private addresses, so it is allowed
+  # explicitly. Do not copy this range into a production configuration
+  # without network-level egress controls.
+  allow_hosts: [mock]
+  allow_cidrs: [172.16.0.0/12, 192.168.0.0/16, 10.0.0.0/8]
+allow_writes: false
+worker:
+  concurrency: 2
+auth:
+  password_hash_env: BACKENDLAB_ADMIN_PASSWORD_HASH
+  # The stack is served over plain HTTP on localhost. Put a TLS proxy in
+  # front and set this to true (the default) for anything else.
+  secure_cookies: false
+retention:
+  run_max_age: 720h
+log:
+  level: info
+  format: json

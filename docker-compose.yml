@@ -1,0 +1,78 @@
+# Local server stack: PostgreSQL, a one-shot migration, the API/dashboard
+# server and a worker. The demonstration service runs only with the
+# "demo" profile and is reachable only on the internal network.
+#
+#   cp .env.example .env   # then fill in the values
+#   docker compose up -d --build
+#   docker compose --profile demo up -d mock
+#
+# PostgreSQL is not published to the host. The server listens on
+# 127.0.0.1:8080 only.
+
+x-backendlab: &backendlab
+  build: .
+  image: backendlab:local
+  env_file: .env
+  environment:
+    BACKENDLAB_CONFIG: /etc/backendlab/backendlab-server.yaml
+  volumes:
+    - ./deploy/compose/backendlab-server.yaml:/etc/backendlab/backendlab-server.yaml:ro
+    - ./examples/server/suites:/etc/backendlab/suites:ro
+  networks: [backend]
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: backendlab
+      POSTGRES_USER: backendlab
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U backendlab -d backendlab"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks: [backend]
+    restart: unless-stopped
+
+  migrate:
+    <<: *backendlab
+    command: ["migrate"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  server:
+    <<: *backendlab
+    command: ["serve"]
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    stop_grace_period: 30s
+
+  worker:
+    <<: *backendlab
+    command: ["worker"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    stop_grace_period: 60s
+
+  mock:
+    image: backendlab:local
+    entrypoint: ["/usr/local/bin/mockservice", "-addr", "0.0.0.0:8090"]
+    profiles: ["demo"]
+    networks: [backend]
+
+volumes:
+  pgdata:
+
+networks:
+  backend:
