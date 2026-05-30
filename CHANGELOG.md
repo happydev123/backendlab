@@ -5,6 +5,26 @@ yet; everything below is unreleased work on the main branch.
 
 ## Unreleased
 
+### Durable runs and dashboard
+
+- PostgreSQL schema with versioned, checksummed migrations and an explicit
+  `backendlab migrate` command.
+- JobDock: run state machine, `FOR UPDATE SKIP LOCKED` claims, leases with
+  heartbeats, fencing tokens on every worker write, cancellation requests,
+  and recovery that retries read-only runs a bounded number of times and
+  marks runs with mutating cases `interrupted`.
+- Worker with bounded concurrency and graceful shutdown (`backendlab worker`).
+- Operator authentication: bcrypt password hash from the environment,
+  PostgreSQL-backed sessions, CSRF tokens, login throttling, and
+  `backendlab hash-password`.
+- Egress policy for server-executed requests (host allowlist, address
+  classification, rebinding-safe dialing).
+- JSON API and server-rendered dashboard for approved suites, run status,
+  cancellation, case results, findings and report downloads, plus a
+  stateless plan comparison page.
+- `backendlab retention cleanup`, Dockerfile, Docker Compose stack, CI
+  workflow and an automated demonstration scenario.
+
 ### Query plans
 
 - QueryLens: parsing of PostgreSQL `EXPLAIN (FORMAT JSON)` output, estimated
