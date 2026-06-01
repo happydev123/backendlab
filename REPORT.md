@@ -1,8 +1,11 @@
-# Implementation report
+# BackendLab delivery report
 
-This report covers the state of the repository at the final commit: what
-is implemented, the main design decisions, the checks that were run and
-their actual results, how to start, and what remains limited.
+This report covers the repository at its final commit: what is implemented,
+the main design decisions, the checks that were run and their actual
+results, how to start, what remains limited, and how the commit history was
+verified.
+
+This repository was implemented with AI assistance. Its commit timestamps were assigned retrospectively to organize development into a November 2025–May 2026 timeline; they do not represent the actual dates the work was performed.
 
 ## Implemented features
 
@@ -138,70 +141,75 @@ their actual results, how to start, and what remains limited.
 
 ## Verification
 
-All commands ran on Windows 11 with Go 1.27.3 (module directive `go 1.26.0`)
-and PostgreSQL 17.6 on 127.0.0.1. Environment for test commands:
-`BACKENDLAB_TEST_DATABASE_URL=postgres://...@127.0.0.1:55432/backendlab_test`
-and `BACKENDLAB_TEST_ASYNC_CLOSE=1` (see "Host-specific notes").
+The checks below were re-run for this report on Windows 11 with Go 1.27.3
+(module directive `go 1.26.0`) and PostgreSQL 17.6 listening on 127.0.0.1.
+Database-backed tests used
+`BACKENDLAB_TEST_DATABASE_URL=postgres://...@127.0.0.1:55432/backendlab_test`.
+Socket tests ran with `BACKENDLAB_TEST_ASYNC_CLOSE=1` (see "Host-specific
+notes").
 
 | Check | Command | Result |
 |---|---|---|
 | Formatting | `gofmt -l cmd internal migrations web demo` | No files listed. |
 | Vet | `go vet ./...` and `go vet -tags demo ./demo/` | Clean. |
-| Build | `go build ./cmd/backendlab ./cmd/mockservice` | Both executables built. |
-| Unit and integration tests | `go test -count=1 ./...` (three consecutive runs) | Each run: 25 of 26 packages passed. The one failure per run was environmental and in a different package each time: `replay` and `stream` binaries exited with native exception `0xc0000417` (no test failure reported), and one `store` test lost its PostgreSQL connection ("forcibly closed by the remote host"). Every package passed in at least one of the runs and in the race run. |
-| Race detector | `CGO_ENABLED=1 go test -race -count=1 ./...` | All packages passed (about 260 s). |
-| PostgreSQL integration | `go test -count=1 ./internal/store/... ./internal/jobs/... ./internal/auth/... ./internal/httpapi/... ./internal/server/...` | Passed against PostgreSQL 17.6 (about 96 s). |
-| Fuzz smoke | each of the 7 fuzz targets with `-fuzztime 10s` | All passed, no failing inputs. |
-| Demonstration | `go test -tags demo -count=1 -v ./demo/` | All 10 steps passed (3 of 3 consecutive runs). |
-| Per-commit history | export each commit, `go build ./...`, `go vet ./...`, `go test` of packages changed by the commit | 121 of 121 earlier commits passed (one test step was re-run after a native crash with no test failure); this report's commit adds documentation only. |
-| History metadata | script checking count, dates, offsets, order, identity, parents, message text | See "Commit history". |
+| Build | `go build ./cmd/backendlab ./cmd/mockservice` | Both executables built; `backendlab version` prints `backendlab 0.1.0-dev (go1.27.3, windows/amd64, report schema backendlab.report/v1)`. |
+| Unit, CLI and PostgreSQL integration tests | `go test -count=1 ./...` | 25 of 26 test packages passed, including `store`, `jobs`, `auth`, `httpapi` and `server` against PostgreSQL. The `replay` test binary exited with native exception `0xc0000417` without reporting a test failure (host issue below). |
+| `replay` re-runs | compiled `replay.test.exe -test.v`, 8 runs from the package directory | 5 runs passed every test; 3 runs died in native code inside `WSASend` (exit 127 or `Exception 0xc0000005` at an address in a non-Go DLL); no run reported a failing test. |
+| Race detector | `CGO_ENABLED=1 go test -race -count=1 ./...` | All 26 test packages passed, including `replay` and the PostgreSQL packages. |
+| Fuzz smoke | each of the 7 fuzz targets with `-fuzztime 10s` (`make fuzz-smoke` list) | All 7 passed, no failing inputs. The first attempt failed to compile with `can't find export data (bufio: buffer full)` from the default Go build cache; with a fresh `GOCACHE` all targets built and passed. |
+| Demonstration | `go test -tags demo -count=1 -v ./demo/` | All 10 steps passed in 3 of 3 consecutive runs with a fresh build cache. An earlier attempt in the same session ended silently in step 4 with no test failure reported (same native crash). |
+| Offline CLI with the built binary | `backendlab validate examples/invoice/invoices-batch.json --rules examples/invoice/invoice-rules.yaml` | Exit 1 with `validate.unique` (INV-1001 twice) and `validate.sum` (INV-1002: 149.97 + 29.99 = 179.96, stated 180.00, difference 0.04 exceeds tolerance 0.01). |
+| | `backendlab plans compare examples/plans/before.json examples/plans/after.json --fail-on scan,spill` | Exit 1. |
+| | `backendlab stream inspect internal/stream/testdata/chat.sse --terminal-data '[DONE]'` | Exit 0: 5 events, termination `terminal_event`, timing `unknown`. |
+| | `backendlab validate nosuch.json --rules ...` | Exit 2. |
+| Live CLI against the mock service | `mockservice` plus `backendlab compare compare-suite.yaml` in `examples/invoice-api` | **Blocked on this host**: the process did not exit within 60 s (exit 124). See below. The same code paths pass in-process in the CLI integration tests and the demonstration. |
+| Per-commit history | each commit exported with `git archive`, then `go build ./...` and `go vet ./...` | All 122 earlier commits built and vetted cleanly (122 of 122). Tests were not re-run per commit. This report's commit changes documentation only. |
+| History metadata | Go program reading `git log` (count, dates, America/Los_Angeles offsets via `time/tzdata`, author/committer order, single parent, identity, message text) | See "Commit history". |
+| Secrets and stray files | `git ls-files` filtered for binaries, databases, keys and `.env`; `git grep` for key and token patterns and for the local database password | Nothing found; `.env.example` contains placeholders only. |
 
-Demonstration results observed (from the test log):
+Demonstration results observed in the final run:
 
-1. Structural comparison: compare exits 1 with differences only on
-   `invoice-detail` at `/total`, `/customer/email` (missing) and
+1. Structural comparison: compare exits 1 with 4 findings; differences only
+   on `invoice-detail` at `/total`, `/customer/email` (missing) and
    `/customer/email_address` (added).
-2. Volatile fields: `request_id` differed between the two responses and was
-   not reported.
+2. Volatile fields: `request_id` differed between the two responses
+   (`req_b734…` versus `req_68bf…`) and was not reported.
 3. Numeric tolerance: `exchange_rate` 1.08 versus 1.0800004 absorbed by an
    absolute tolerance of 0.00001.
 4. Invoice totals: the candidate fails `validate.sum`; the baseline passes;
-   the batch file reports `validate.sum` and `validate.unique`.
+   the batch file produces 3 findings.
 5. SSE across fragmented writes: the chat stream (split inside lines, CRLF
    pairs and UTF-8 characters) passes all expectations.
-6. Stream classification: truncated stream reports `stream.missing_terminal`,
-   the gap stream `stream.max_gap_exceeded`, a slow request `replay.timeout`.
-7. Plan comparison: `--fail-on scan,spill` exits 1 with
-   `plans.scan_strategy_changed` and `plans.sort_spill_introduced`.
-8. Background run: submitted through the API, completed by a worker with
-   status `failed` (the environments differ), Markdown report downloaded.
-9. Cancellation: a run with a slow request was cancelled while in flight.
+6. Stream classification: the truncated stream reports a missing terminal
+   marker, the gap stream a gap over the limit, a slow request a
+   `replay.timeout` transport error.
+7. Plan comparison: 11 findings including a scan strategy change and a sort
+   spill.
+8. Background run: submitted through the API and completed by a worker with
+   status `failed` (the environments differ); Markdown report downloaded.
+9. Cancellation: a run was cancelled while its slow request was in flight.
 10. Interrupted mutating run: one upstream increment, status `interrupted`
-    pending operator review, not claimable again, still one increment after
-    recovery.
+    ("worker lease expired during attempt 1; the run contains mutating
+    cases, so it is unknown which requests reached the upstream"), not
+    requeued.
 
 ### Host-specific notes and blocked checks
 
-- On this machine a Winsock layered service provider (installed by a VPN
-  product) blocks socket close while a read is pending and occasionally
-  crashes processes inside `WSASend`. Tests that use sockets therefore run
-  with `BACKENDLAB_TEST_ASYNC_CLOSE=1`, which makes test listeners and
-  client connections close in the background; production code does not
-  read this variable.
-- The crash appears as a process exit with `0xc0000417` or an access
-  violation `0xc0000005` in native code, with no Go test failure reported.
-  It hit the `replay` test binary in about one run in three, occasionally
-  other socket-heavy test binaries, and once ended a demo run inside a
-  combined check run. Local PostgreSQL connections are affected too: one
-  test connection was reset by the host during setup. Repeated runs pass; the race
-  detector run, which serializes more, passed every package.
-- `TestWorkerBoundsConcurrency` once exceeded its 10-second wait while every
-  package ran in parallel against the slow local database; its waits are now
-  30 seconds.
-- End-to-end runs of the compiled `backendlab` binary against a local HTTP
-  server hang or crash on this host for the same reason (exit 124 after a
-  60-second timeout). The same paths are exercised in-process by the CLI
-  integration tests and the demonstration scenario.
+- This machine has a Winsock layered service provider ("ASProxy", listed by
+  `netsh winsock show catalog`). With it, closing a socket that has a
+  pending read can block indefinitely, and processes occasionally crash in
+  native code inside `WSASend`. A 20-line standard-library Go program that
+  performs one GET against the mock service returns in about 5 ms, but hangs
+  as soon as it calls `http.Transport.CloseIdleConnections()`. That is
+  the step at which the `backendlab` binary stops at the end of a run, so
+  the live CLI check is recorded as blocked rather than passed.
+- For tests, `BACKENDLAB_TEST_ASYNC_CLOSE=1` makes test listeners and
+  client connections close in the background. Production code does not read
+  this variable.
+- The native crashes appear as exit `0xc0000417` or `Exception 0xc0000005`
+  with no Go test failure. They affected the `replay` test binary in about
+  one run in three and one demonstration run. Repeated runs and the race
+  detector run passed.
 - **Not run:** `docker build` and `docker compose` (Docker is not installed
   here) and the GitHub Actions workflow (nothing was pushed). Both are
   configured but unverified.
@@ -242,16 +250,22 @@ Server mode: see the README and `docs/server-operations.md`
 
 ## Commit history
 
-- Commits: 122, all on `main`, linear, author and committer
+- Commits: 123, all on `main`, linear (one root, every other commit has a
+  single parent), no empty commits, author and committer
   `happydev123 <michaelmu2222@gmail.com>`.
-- First commit: 2025-11-01 10:14 -07:00. Last commit (this report):
-  2026-05-31 17:22 -07:00.
+- First commit: 2025-11-01 10:14:07 -07:00. Last commit (this report):
+  2026-05-31, after the previous commit at 17:22:41 -07:00.
 - Per month: November 15, December 20, January 14, February 17, March 15,
-  April 22, May 19.
-- Author and committer dates increase strictly along the history and use
-  America/Los_Angeles offsets (-07:00 before 2025-11-02 and from
-  2026-03-08, -08:00 in between).
+  April 22, May 20.
+- Author and committer dates increase strictly along the history. Every
+  offset matches America/Los_Angeles for its date: -07:00 before 2025-11-02
+  and from 2026-03-08, -08:00 in between.
+- Planning documentation is part of the first implementation commit; no
+  commit exists only to adjust the timeline.
 
-Commit timestamps were assigned retrospectively to organize development into
-a November 2025–May 2026 timeline; they do not represent the actual dates the
-work was performed. See [development-history.md](development-history.md).
+## Reconstructed-history disclosure
+
+This repository was implemented with AI assistance. Its commit timestamps were assigned retrospectively to organize development into a November 2025–May 2026 timeline; they do not represent the actual dates the work was performed.
+
+The same statement appears in [README.md](README.md) and
+[docs/development-history.md](docs/development-history.md).

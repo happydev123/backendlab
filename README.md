@@ -237,6 +237,7 @@ See [docs/server-operations.md](docs/server-operations.md).
 | Egress policy | [docs/egress.md](docs/egress.md) |
 | Security model | [docs/security.md](docs/security.md) |
 | Development history | [docs/development-history.md](docs/development-history.md) |
+| Delivery report and verification results | [REPORT.md](REPORT.md) |
 
 ## Tests
 
@@ -254,11 +255,14 @@ invoice total, a fragmented SSE stream, stream timeout and completion
 classification, a plan comparison, a background run through the API,
 cancellation, and an interrupted mutating run that is not retried.
 
-## Commit history
+## Reconstructed commit timeline and AI assistance
 
-Commit timestamps were assigned retrospectively to organize development into
-a November 2025–May 2026 timeline; they do not represent the actual dates the
-work was performed. See [docs/development-history.md](docs/development-history.md).
+This repository was implemented with AI assistance. Its commit timestamps were assigned retrospectively to organize development into a November 2025–May 2026 timeline; they do not represent the actual dates the work was performed.
+
+The commits are ordered by the stages of
+[docs/implementation-plan.md](docs/implementation-plan.md); see
+[docs/development-history.md](docs/development-history.md) for the monthly
+breakdown and [REPORT.md](REPORT.md) for the verification record.
 
 ## License
 

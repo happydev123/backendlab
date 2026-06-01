@@ -15,9 +15,9 @@ dependency order, and each was checked to build on its own.
 | February 2026 | 17 | 2 | ExtractCheck rules: decimals, rounding, field wildcards, required/allowed/pattern, sums, products, line items, dates, uniqueness; rules loading, validator, document batches, reports, invoice examples, runner integration with replay, `validate` command, mock-service example suites. |
 | March 2026 | 15 | 3 | QueryLens plan model, node families, parsing and rejection of unsupported input, summaries, node matching, strategy, estimate, spill and observation rules, end-to-end comparison and reports, `plans compare` command, CLI integration tests. |
 | April 2026 | 22 | 4 | Server configuration, PostgreSQL pool and migrations, run storage, state machine, claims with fencing tokens, leases, cancellation, fenced writes, recovery, worker, sessions and login throttling, password hashing, retention, egress policy, background executor, server-side CLI commands, integration tests in CI. |
-| May 2026 | 19 | 4 | Suite catalog and submission policy, JSON API, dashboard, server assembly, `serve`, server operations guide, demonstration scenario, Docker and Compose, architecture and security documentation, README, this history and the implementation report. |
+| May 2026 | 20 | 4 | Suite catalog and submission policy, JSON API, dashboard, server assembly, `serve`, server operations guide, demonstration scenario, Docker and Compose, architecture and security documentation, README, this history, and the delivery report (`REPORT.md`) with re-run verification results. |
 
-Total: 122 commits, the first on 2025-11-01 and the last on 2026-05-31.
+Total: 123 commits, the first on 2025-11-01 and the last on 2026-05-31.
 
 ## How to read the history
 
