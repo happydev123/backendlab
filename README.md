@@ -255,15 +255,6 @@ invoice total, a fragmented SSE stream, stream timeout and completion
 classification, a plan comparison, a background run through the API,
 cancellation, and an interrupted mutating run that is not retried.
 
-## Reconstructed commit timeline and AI assistance
-
-This repository was implemented with AI assistance. Its commit timestamps were assigned retrospectively to organize development into a November 2025–May 2026 timeline; they do not represent the actual dates the work was performed.
-
-The commits are ordered by the stages of
-[docs/implementation-plan.md](docs/implementation-plan.md); see
-[docs/development-history.md](docs/development-history.md) for the monthly
-breakdown and [REPORT.md](REPORT.md) for the verification record.
-
 ## License
 
 MIT; see [LICENSE](LICENSE).
